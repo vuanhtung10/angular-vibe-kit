@@ -27,7 +27,7 @@ modules (Strangler Fig).
 Run inside the root of your Angular project:
 
 ```bash
-npx @tungva/angular-vibe-kit
+npx @tungvivas/angular-vibe-kit
 ```
 
 The installer (no AI, fully deterministic):

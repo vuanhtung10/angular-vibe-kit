@@ -60,7 +60,7 @@ function printHelp() {
   log(`${c.bold}angular-vibe-kit${c.reset} — bootstrap the Vibe Coding workflow into an Angular project
 
 ${c.bold}Usage${c.reset}
-  npx @tungva/angular-vibe-kit [options]
+  npx @tungvivas/angular-vibe-kit [options]
 
 ${c.bold}Options${c.reset}
   --version <n>   Override detected Angular major version (e.g. 17)
@@ -184,7 +184,7 @@ function main() {
     log("");
     log(`${c.bold}Supported versions:${c.reset} 12, 13, 14, 15, 16, 17, 18, 19`);
     log(`If you still want to proceed, use the closest profile:`);
-    log(`  ${c.cyan}npx @tungva/angular-vibe-kit --version 12${c.reset}  (v12-13 best practices)`);
+    log(`  ${c.cyan}npx @tungvivas/angular-vibe-kit --version 12${c.reset}  (v12-13 best practices)`);
     process.exit(1);
   }
 
