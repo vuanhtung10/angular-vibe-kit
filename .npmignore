@@ -1,0 +1,25 @@
+# dev / editor cruft
+node_modules/
+.git/
+.gitignore
+.vscode/
+.idea/
+*.log
+.DS_Store
+
+# secrets (defense in depth — never commit, never publish)
+.env
+.env.*
+*.pem
+*.key
+
+# local tests
+*.test.js
+test/
+tests/
+coverage/
+
+# build artifacts (we ship source as-is, no build step)
+dist/
+build/
+out/

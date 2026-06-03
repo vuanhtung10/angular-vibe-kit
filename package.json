@@ -1,0 +1,40 @@
+{
+  "name": "@tungva/angular-vibe-kit",
+  "version": "0.1.0",
+  "description": "Bootstrap a Vibe Coding workflow (CLAUDE.md, project docs, slash-commands) into any Angular project. Detects your Angular version and installs version-matched best-practice rules.",
+  "keywords": [
+    "angular",
+    "claude",
+    "claude-code",
+    "ai",
+    "scaffold",
+    "vibe-coding",
+    "slash-commands"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "angular-vibe-kit": "bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "commands/",
+    "practices/",
+    "templates/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "test": "node bin/cli.js --help",
+    "prepublishOnly": "node -c bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vuanhtung10/angular-vibe-kit.git"
+  },
+  "homepage": "https://github.com/vuanhtung10/angular-vibe-kit#readme",
+  "bugs": "https://github.com/vuanhtung10/angular-vibe-kit/issues"
+}
