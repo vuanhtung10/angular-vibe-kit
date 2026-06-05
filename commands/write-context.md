@@ -45,6 +45,12 @@ Note what is local component state vs shared state.
 - **{Decision}**: {reason}
 - **{Decision}**: {reason}
 
+## Component Wrapping Decisions
+- **Wrapped components used**: list the `<app-*>` components used by this feature (e.g. `<app-select>`, `<app-data-table>`)
+- **Library components used directly**: list any direct library imports and the reason (e.g. `p-tree` used directly because no wrapper exists yet, and creating one is out of scope for this feature)
+- **New wrappers introduced**: if this feature adds a new wrapper to `shared/components/`, list it here and link to the PR/ADR
+- **Wrappers NOT used (with reason)**: if a wrapper exists for the need but you chose not to use it, document why (e.g. "wrapper doesn't support X yet — track in #123")
+
 ## Considered and Rejected
 - **{Option}**: rejected because {reason}
 

@@ -18,7 +18,8 @@ and keeps the AI honest with version-correct Angular rules (v14 → v19).
 
 It also handles the real-world case: **the project isn't fully best-practice yet.**
 The kit adds correct rules for *new* code without forcing risky refactors on legacy
-modules (Strangler Fig).
+modules (Strangler Fig). And when the project wraps its UI library in `shared/components/`,
+the kit teaches the AI to always use the wrapper, not the raw library import.
 
 ---
 
@@ -101,6 +102,25 @@ then writes a **Coexistence Strategy** into `PROJECT-RULES.md`:
 - Legacy modules → listed as **do-not-touch** (no refactor unless asked).
 
 Anything uncertain becomes a question — the kit never silently rewrites your rules.
+
+---
+
+## Component Wrapping (generic UI convention)
+
+The kit enforces a generic priority rule for UI components:
+
+1. **Wrapper in `shared/components/`** (or `ui/`, `common/`, etc.) — used if it exists for the need
+2. **UI library direct** — used only if no wrapper exists; warning logged
+3. **Custom build** — only when the library has no equivalent
+
+When you run `/init`, it scans your codebase for wrapper components (sub-folders
+of `shared/components/` that import a known UI library) and writes a
+**Wrapped Components** table into `docs/DESIGN_SYSTEM.md`. From then on:
+- `/new-feature` consults that table when generating UI code
+- `/review-pr` flags a wrapper-bypass as 🔴 BLOCKER in new code
+- `/write-context` captures the WHY behind any library-direct decisions
+
+Works for any UI library — PrimeNG, Material, ng-zorro, ng-bootstrap, custom.
 
 ---
 

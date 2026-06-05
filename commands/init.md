@@ -25,7 +25,8 @@ The version-matched best-practice file is in `.claude/angular-practices/`
 
 ## Stage 0: Scan (read-only, no output yet)
 1. Read the BP file in `.claude/angular-practices/` (one file — the version's idioms).
-2. Read `package.json` → Angular version, UI library, test runner, state libs.
+2. Read `package.json` → Angular version, **UI library (auto-detect from dependencies)**, test runner, state libs.
+   - **UI library detection**: scan `dependencies` and `devDependencies` for known third-party UI packages. Examples include but are NOT limited to: `primeng`, `@angular/material`, `@angular/cdk`, `ng-zorro-antd`, `@ng-bootstrap/*`, `ngx-bootstrap`, `@clr/angular`, `@progress/kendo-angular-*`, `@ionic/angular`, `@nebular/*`, `element-angular`, `@spike-rabbit/element-angular`, `flowbite-angular`, or any package whose name suggests a UI/design system. **Record all matches** — the project may use more than one. **Do NOT hardcode a fixed list** — infer from what is actually installed.
 3. Scan `src/`:
    - Module system: standalone vs NgModule
    - State: NgRx / Signals / BehaviorSubject / plain service
@@ -33,6 +34,17 @@ The version-matched best-practice file is in `.claude/angular-practices/`
    - HTTP pattern: HttpClient in services vs components
    - Interceptors, guards, auth flow, token handling
    - Test setup, shared components, UI library usage
+   - **Wrapped components detection** (library-agnostic — works for any UI library the project actually uses):
+     - Use the UI library list detected from `package.json` in Step 2 (NOT a hardcoded list)
+     - Enumerate the project's shared component folder (e.g. `shared/components/`, `ui/`, `common/`, `components/` — record the actual folder name)
+     - For each sub-folder, look for:
+       - A `*.component.ts` file with a `@Component` decorator
+       - A TypeScript `import` statement that matches one of the detected UI library packages
+         (e.g. if `primeng` is in deps → look for `from 'primeng/...'`; if `@clr/angular` is in deps → look for `from '@clr/angular'`)
+       - A simple `value`/`valueChange` input-output pair suggesting it wraps a single primitive
+     - Exclude framework imports from the match list: `@angular/core`, `@angular/common`, `@angular/router`, `@angular/forms`, `@angular/animations`, `@angular/platform-browser*`, `rxjs`, `@ngrx/*`, `zone.js`, `tslib` (these are NOT UI library imports)
+   - Record each candidate as `wrapper {name} → library {detected_package}/{imported_module}` for Stage 2 table generation
+   - Pick one as "Wrapper Reference Example" (simplest API + most reused) and record the path for `project-rules.md` Reference Examples table
 4. **Find the best-example files** — the most complete, idiomatic feature to use as a
    reference template. Pick the best example for each of: a service, a smart/page
    component, a dumb component, a test spec. Verify each path exists.
@@ -43,6 +55,9 @@ The version-matched best-practice file is in `.claude/angular-practices/`
 1. Gather every `uncertain` item across ALL seven files into a single list
    (e.g. "both NgRx and Signals present — which is primary?", "response envelope shape?",
    "auth model?", "which forms approach?", "confirm this legacy do-not-touch list").
+   - **Wrapper auto-detection**: if wrappers were detected in Stage 0, confirm for each:
+     (a) which library component it wraps, (b) custom additions, (c) is it required (BLOCKER) or preferred (SUGGESTION).
+     Default if team does not answer: treat as SUGGESTION.
 2. Ask them as ONE grouped batch of multiple-choice questions.
 3. **WAIT** for the answers. Do not write any file until the batch is answered.
 4. If nothing is uncertain, say so and proceed directly to Stage 2.
@@ -56,7 +71,7 @@ placeholder with real content. Do NOT stop between files.
 3. **docs/ARCHITECTURE.md** — actual layer structure, routing/lazy-loading, state approach, HTTP/interceptor flow, auth strategy. Full detail here (not in CLAUDE.md).
 4. **.claude/rules/project-rules.md** — tech stack, naming, coding rules (actionable, not prose). Include the `## Precedence` section, the `## Reference Examples` section (best-example files from Stage 0 — paths that exist only), and the `## Coexistence Strategy` section (see below).
 5. **docs/PROJECT-STATUS.md** — snapshot: what exists, in progress, known issues, next tasks. Session counter = 1.
-6. **docs/DESIGN_SYSTEM.md** — UI library, design tokens (infer from styles/theme), shared/reusable components in whatever the project calls that folder (record the actual name).
+6. **docs/DESIGN_SYSTEM.md** — UI library, design tokens (infer from styles/theme), shared/reusable components in whatever the project calls that folder (record the actual name), AND the **Wrapped Components** table (filled from Stage 0 detection, confirmed in Stage 1). If no wrappers found, OMIT the Wrapped Components section and add: `> This project uses UI library components directly — no shared wrappers.`
 7. **docs/decisions/** — one ADR per real decision confirmed (e.g. `001-state-management.md`, `002-auth-token-storage.md`). Only for actual decisions.
 
 ### Coexistence Strategy (inside project-rules.md)
@@ -85,7 +100,7 @@ Print a summary so I can review everything at once:
 | docs/ARCHITECTURE.md | created/updated | ... |
 | .claude/rules/project-rules.md | created/updated | precedence + coexistence + reference examples |
 | docs/PROJECT-STATUS.md | created/updated | ... |
-| docs/DESIGN_SYSTEM.md | created/updated | ... |
+| docs/DESIGN_SYSTEM.md | created/updated | ... | + Wrapped Components table (N rows, or omitted if none) |
 | docs/decisions/00x-*.md | created | ... |
 
 **3. Questions I asked & your answers** — short list (for the record).

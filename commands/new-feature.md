@@ -10,7 +10,7 @@ has no convention or is below standard (new code only); legacy modules are never
 - Read `.claude/rules/project-rules.md` → naming, structure, Coexistence rules, **Reference Examples**
 - Read `docs/ARCHITECTURE.md` → where this feature fits
 - Read `docs/API_CONTRACT.md` → which endpoints this feature calls
-- Read `docs/DESIGN_SYSTEM.md` → shared components to use
+- Read `docs/DESIGN_SYSTEM.md` → shared components to use, **AND the Wrapped Components table → which wrapper to use for each UI library primitive** (e.g. for a dropdown, use `<app-select>` not `p-dropdown`)
 - **Open the Reference Example files** listed in `project-rules.md` (best existing service / page / component / spec) and mirror their style — this is the strongest signal for matching the project's real conventions
 - Ask me if anything is unclear before writing code
 
@@ -56,6 +56,7 @@ has no convention or is below standard (new code only); legacy modules are never
 - No `any` — interfaces/types for every model and response
 - Use the project's forms approach from `project-rules.md` (Reactive Forms by default; Formly / template-driven if that's what the project uses)
 - No hardcoded backend URL — use `environment`
+- **Wrapper priority**: import from `@shared/components/<name>` (or the project's wrapper folder) if a wrapper exists; never import the library component directly. See `docs/DESIGN_SYSTEM.md` → Wrapped Components.
 
 ## Step 6: Update Documentation
 - `docs/API_CONTRACT.md` if you used/discovered endpoints

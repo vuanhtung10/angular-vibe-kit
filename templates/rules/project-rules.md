@@ -49,11 +49,19 @@ When guidance conflicts, follow this order top to bottom:
 ## Coding Rules
 > /init will generate concrete rules based on Angular version + what the project does.
 
+## Component Wrapper Priority
+- ALWAYS check `docs/DESIGN_SYSTEM.md` → **Wrapped Components** before importing a UI library
+- If a wrapper exists for the need → import the wrapper (e.g. `import { AppSelectComponent } from '@shared/components/select'`), NEVER the raw library (`p-dropdown`)
+- If no wrapper exists → use the library directly and log a warning to the user: `> ⚠️ No wrapper for <X> — using library directly. Consider creating one in shared/components/`
+- If unsure whether a wrapper exists → ASK the team before writing the import
+- This rule is enforced by `/review-pr` (🔴 BLOCKER if violated in new code)
+
 ## DO NOT
 - Do NOT use `any`
 - Do NOT call HttpClient from components
 - Do NOT store tokens in localStorage
 - Do NOT hardcode the backend URL
+- Do NOT import UI library components directly in features when a wrapper exists in `shared/components/`
 
 ## Reference Examples
 > /init fills this with the best existing files to copy patterns from.

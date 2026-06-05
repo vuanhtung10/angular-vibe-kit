@@ -51,6 +51,14 @@ because it differs from the profile.
 - [ ] No dead code, no `console.log`
 - [ ] Naming follows `.claude/rules/project-rules.md`
 
+## Component Wrapping (follow `docs/DESIGN_SYSTEM.md` → Wrapped Components)
+- [ ] No feature imports a raw UI library component (`p-dropdown`, `mat-form-field`, `nz-input`, etc.) when a wrapper exists in `shared/components/`
+- [ ] All UI primitive imports go through the project's wrapper (check the import path matches the wrapper's location)
+- [ ] If a wrapper exists for the need but the PR uses the library directly → 🔴 BLOCKER
+- [ ] If no wrapper exists and the library is used directly → 🟡 SUGGESTION: "Consider creating a wrapper in `shared/components/` for consistency"
+- [ ] New components do NOT silently re-implement logic an existing wrapper already provides
+- [ ] If a brand-new wrapper is introduced → verify it follows the Wrapper Reference Example from `project-rules.md`
+
 ## Documentation
 - [ ] New feature: `CONTEXT.md` created inside feature folder
 - [ ] Logic changed: `CONTEXT.md` Refactor Log updated (append only)
