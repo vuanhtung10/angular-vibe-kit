@@ -1,6 +1,6 @@
 {
   "name": "@tungvivas/angular-vibe-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Bootstrap a Vibe Coding workflow (CLAUDE.md, project docs, slash-commands) into any Angular project. Detects your Angular version and installs version-matched best-practice rules.",
   "keywords": [
     "angular",
