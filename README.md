@@ -36,8 +36,14 @@ The installer (no AI, fully deterministic):
 1. Reads `./package.json` → detects your Angular version
 2. Copies slash-commands → `./.claude/commands/`
 3. Copies the **version-matched** best-practice file → `./.claude/angular-practices/`
-4. Copies doc templates → `./.claude/angular-kit/templates/`
-5. Tells you to run `/init` in Claude Code
+4. Installs **skills** → `./.claude/skills/` (auto-applied by Claude — no command needed)
+5. Installs **references** → `./.claude/references/` (shared review checklist + test spec)
+6. Installs **agents** → `./.claude/agents/` (Angular subagents, isolated context)
+7. Writes **settings.json** → `./.claude/settings.json` (allowlist + build-verify hook)
+8. Copies doc templates → `./docs/` and `./CLAUDE.md`, rules → `./.claude/rules/`
+9. Tells you to run `/init` in Claude Code
+
+> Requires Node.js 16+ (only for the installer — your project stays pure Angular).
 
 ### Options
 | Flag | Effect |
@@ -67,11 +73,111 @@ Then every working session:
 | Command | When | Does |
 |---------|------|------|
 | `/start` | Start of session | Read docs, summarize progress, wait |
+| `/plan` | Large feature, before coding | Clarify → approaches → design → write task-by-task plan to `docs/plans/` |
 | `/new-feature` | New module | Scaffold → implement → test → docs |
 | `/write-tests` | Code without tests | Service spec + component test |
 | `/write-context` | New/complex module | Create `CONTEXT.md` snapshot |
 | `/review-pr` | Before commit | Angular review checklist → 🔴/🟡/🟢 |
 | `/update-status` | End of session | Update `PROJECT-STATUS.md` + commit |
+| `/dev-cycle` | Whole feature | Gated end-to-end orchestrator |
+
+**Recommended flow for a sizeable feature:** `/plan` → review the plan doc → `/dev-cycle` (or
+`/new-feature`). `/plan` clarifies the requirement, weighs 2-3 approaches, and writes a reviewed,
+task-by-task plan to `docs/plans/`; `/dev-cycle` and `/new-feature` **auto-detect that plan** and
+follow its File Map and interfaces instead of re-deriving structure on the fly. Small features can
+skip `/plan` and go straight into `/dev-cycle` / `/new-feature`. The `/plan` workflow is adapted
+from [obra/superpowers](https://github.com/obra/superpowers) (MIT).
+
+If your requirements come from a large multi-module SRS (e.g. a Word doc converted with `pandoc`
+into one big Markdown file), split out just the module you're building and save it under
+`docs/srs/<module-name>.md` (created by the installer — see `docs/srs/README.md`), then point
+`/plan` at that file instead of pasting the whole SRS.
+
+---
+
+## Commands vs skills vs agents
+
+The kit installs all three — they differ in **who triggers them** and **where they run**:
+
+| | Command (`/start`, `/review-pr`) | Skill (`angular-practices`) | Agent (`angular-reviewer`) |
+|---|---|---|---|
+| **Who triggers it** | **You** type `/name` deliberately | **Claude** activates it when context matches | **You** (or Claude) dispatch by name |
+| **Runs in** | Your main conversation | Your main conversation | An **isolated** context (parallel/background) |
+| **Best for** | A workflow you run at a point in time | Knowledge that should apply *whenever* relevant | Heavy/parallel work without bloating the main thread |
+| **Lives in** | `.claude/commands/` | `.claude/skills/<name>/SKILL.md` | `.claude/agents/<name>.md` |
+
+So `/review-pr` stays a command (you choose when to review); `angular-practices` is a
+skill (idioms auto-apply the moment you write a component, even in free-form chat); and
+`angular-reviewer` is an agent (it reviews in a separate context, so you can keep coding while
+it runs). The skill is a thin pointer to your `.claude/angular-practices/<version>.md` profile,
+so there is a single source of truth (no duplication) — and the agents point to the skills too.
+
+**No duplication between a command and its agent twin.** `/review-pr` and `angular-reviewer` both
+apply the *same* `.claude/references/review-checklist.md`; `/write-tests` and `angular-test-writer`
+both apply `.claude/references/test-spec.md`. The command runs it **inline**; the agent runs it in an
+**isolated** context. Pick by weight:
+
+| Situation | Reach for |
+|-----------|-----------|
+| Quick check, small diff, want to see the reasoning inline | the **command** (`/review-pr`, `/write-tests`) |
+| Large diff / whole feature, or you want to keep coding while it runs | the **agent** (`angular-reviewer`, `angular-test-writer`) |
+| Multi-phase feature build with gates | the **orchestrator** (`/dev-cycle`, `/new-feature`) — it dispatches the agents at the test & review phases |
+| Knowledge that should apply *whenever* you write code | the **skill** (auto — no trigger) |
+
+Five skills ship today:
+- **angular-practices** — points to your version-matched profile; auto-applies when
+  writing/reviewing/refactoring Angular code.
+- **clarify-request** — normalizes vague prompts ("fix bug A", "thêm trường X") into a standard
+  brief: fills context from your docs/code first, batch-asks only what's missing, then routes to
+  the right command/agent (`/plan`, `angular-debugger`, `/review-pr`, or a direct edit).
+- **component-wrapper-priority** — carries the decision tree for using your project's shared
+  wrapper components instead of raw UI-library imports; auto-applies before a raw library import.
+- **explain** — explains code / concepts / flows / decisions; reads your `docs/` + rules so the
+  explanation matches *this* project (version/UI library/state/folder layout — nothing hardcoded).
+- **git-commit** — generates conventional commit messages following your `## Commit Convention`
+  in `project-rules.md` (prefix, language, and scope are per-project, filled by `/init`).
+
+## Agents (parallel / isolated context)
+
+Eight Angular-specialized subagents run in their own context window — dispatch them by name, and
+they can run in the **background** while you keep working. They all read your skills + profile +
+`docs/` first, so their output matches *this* project's conventions, version idioms, and wrapper rules.
+
+| Agent | Use for | How to call |
+|-------|---------|-------------|
+| **angular-reviewer** | Review changes before commit (read-only) | *"use angular-reviewer on my changes"* |
+| **angular-build-fixer** | TypeScript/`ng build` errors (strict templates, imports) | *"use angular-build-fixer to fix this build"* |
+| **angular-debugger** | Runtime errors — DI, change detection, RxJS leaks, routing | *"use angular-debugger to trace this NG0100"* |
+| **angular-test-writer** | Write a feature's test suite + coverage | *"run angular-test-writer in the background for OrderComponent"* |
+| **angular-a11y-auditor** | WCAG 2.2 AA audit — keyboard, screen reader, contrast, ARIA (read-only) | *"use angular-a11y-auditor on the checkout page"* |
+| **angular-onboarding** | Understand an unfamiliar codebase — map + trace paths (read-only) | *"use angular-onboarding to explain this repo"* |
+| **angular-ui-designer** | Design/extend the design system — tokens, states, responsive specs | *"use angular-ui-designer for the settings panel"* |
+| **angular-git-workflow** | Atomic conventional commits, branching, rebase/merge, recovery | *"use angular-git-workflow to clean up my branch"* |
+
+There is no slash syntax — agents are invoked in plain language (Claude dispatches them). They
+complement, not replace, your own global agents and Claude Code's native worktree support.
+
+## Automation (settings & hooks)
+
+The installer writes a `.claude/settings.json` so vibe coding flows with fewer interruptions:
+
+- **Permission allowlist** — pre-approves `ng`, `npm`, `npx`, `pnpm`, `yarn`, and read-only git
+  (`status`, `diff`, `log`, `show`) so Claude isn't constantly asking permission. State-changing git
+  (`commit`, `push`) is deliberately **not** allowed — you approve those.
+- **Build-verify Stop hook** — after each turn it runs a fast type-check, but **only when `.ts` or
+  `.html` files changed since `HEAD`** — so a question-only turn skips it entirely:
+
+  ```
+  git diff --quiet HEAD -- '*.ts' '*.html' || npx tsc --noEmit
+  ```
+
+  It uses your project's `typecheck` script if you have one. A type error is shown to Claude
+  (non-blocking) so it can fix it before you commit — without trapping the session. Want full
+  template checking? Swap `npx tsc --noEmit` for `ng build` (slower). **To disable:** delete the
+  `hooks` block from `settings.json`.
+
+If the project already has a `.claude/settings.json`, the installer **skips it** (won't overwrite your
+settings) — merge the allowlist/hook in manually, or re-run with `--force`.
 
 ---
 
@@ -116,8 +222,9 @@ The kit enforces a generic priority rule for UI components:
 When you run `/init`, it scans your codebase for wrapper components (sub-folders
 of `shared/components/` that import a known UI library) and writes a
 **Wrapped Components** table into `docs/DESIGN_SYSTEM.md`. From then on:
+- the **component-wrapper-priority** skill auto-applies the rule whenever you write UI code
 - `/new-feature` consults that table when generating UI code
-- `/review-pr` flags a wrapper-bypass as 🔴 BLOCKER in new code
+- `/review-pr` **and** the `angular-reviewer` agent flag a wrapper-bypass as 🔴 BLOCKER in new code
 - `/write-context` captures the WHY behind any library-direct decisions
 
 Works for any UI library — PrimeNG, Material, ng-zorro, ng-bootstrap, custom.
@@ -128,18 +235,44 @@ Works for any UI library — PrimeNG, Material, ng-zorro, ng-bootstrap, custom.
 
 ```
 your-angular-app/
-├── CLAUDE.md                       # generated by /init
+├── CLAUDE.md                       # generated/filled by /init
 ├── .claude/
-│   ├── commands/                   # 7 slash-commands (copied by installer)
-│   │   ├── init.md  start.md  new-feature.md  review-pr.md
-│   │   ├── write-tests.md  write-context.md  update-status.md
+│   ├── commands/                   # 9 slash-commands (copied by installer)
+│   │   ├── init.md  start.md  plan.md  new-feature.md  review-pr.md
+│   │   ├── write-tests.md  write-context.md  update-status.md  dev-cycle.md
 │   ├── angular-practices/          # 1 version-matched profile (copied)
 │   │   └── v17.md
-│   └── angular-kit/templates/      # doc templates (copied)
-└── docs/                           # generated by /init
-    ├── PROJECT-RULES.md  ARCHITECTURE.md  API_CONTRACT.md
-    ├── PROJECT-STATUS.md  DESIGN_SYSTEM.md
-    └── decisions/
+│   ├── references/                 # shared SoT — both commands & agents read these
+│   │   ├── review-checklist.md     #   → /review-pr + angular-reviewer
+│   │   ├── test-spec.md            #   → /write-tests + angular-test-writer
+│   │   ├── feature-structure.md    #   → /new-feature + /dev-cycle (folder tree, order, coding rules)
+│   │   └── plan-spec.md            #   → /plan writes it; /dev-cycle + /new-feature consume it
+│   ├── skills/                     # auto-applied by Claude (no command needed)
+│   │   ├── angular-practices/      #   → version idioms; triggers when writing Angular code
+│   │   │   └── SKILL.md
+│   │   ├── clarify-request/        #   → normalizes vague prompts into a standard brief + routes
+│   │   │   └── SKILL.md
+│   │   ├── component-wrapper-priority/  # → enforces shared wrappers over raw library imports
+│   │   │   └── SKILL.md
+│   │   ├── explain/               #   → explains code/concepts/flows in your project's language
+│   │   │   ├── SKILL.md
+│   │   │   └── templates/vi.md
+│   │   └── git-commit/            #   → conventional commits per your Commit Convention
+│   │       ├── SKILL.md
+│   │       └── references/conventions.md
+│   ├── agents/                     # 8 Angular subagents (isolated context, run in parallel)
+│   │   ├── angular-reviewer.md  angular-build-fixer.md  angular-debugger.md
+│   │   ├── angular-test-writer.md  angular-a11y-auditor.md  angular-onboarding.md
+│   │   └── angular-ui-designer.md  angular-git-workflow.md
+│   ├── settings.json               # allowlist (fewer prompts) + build-verify Stop hook
+│   └── rules/
+│       └── project-rules.md        # auto-loaded every session (filled by /init)
+└── docs/
+    ├── ARCHITECTURE.md  API_CONTRACT.md  DESIGN_SYSTEM.md   # filled by /init
+    ├── PROJECT-STATUS.md                                     # filled by /init
+    ├── decisions/                                            # filled by /init
+    ├── srs/                         # created by installer — drop your split SRS excerpts here
+    └── plans/                       # created by /plan — one plan doc per feature
 ```
 
 ---

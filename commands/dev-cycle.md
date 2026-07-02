@@ -5,6 +5,11 @@ This is an ORCHESTRATOR. It chains the other commands' logic, but it is NOT
 fully autonomous: after every phase it STOPS at a gate and waits for your
 explicit confirmation before continuing.
 
+Angular idioms depend on the project version — read `.claude/angular-practices/` and follow it.
+**Precedence** (see `.claude/rules/project-rules.md` → Precedence): a valid project convention wins
+over the BP profile; the profile applies only where the project has no convention or is below
+standard (new code only); legacy modules are never refactored.
+
 ---
 
 ## THE GATE RULE (applies after EVERY phase — non-negotiable)
@@ -26,28 +31,50 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
 ## Phase 0 — Kickoff
 
 1. Read context:
-   - `.claude/rules/project-rules.md`
+   - `CLAUDE.md`
+   - `.claude/rules/project-rules.md` → naming, structure, Coexistence, **Reference Examples**
    - `docs/ARCHITECTURE.md`
    - `docs/API_CONTRACT.md`
-   - `docs/DESIGN_SYSTEM.md`
+   - `docs/DESIGN_SYSTEM.md` → shared components + Wrapped Components table
    - `.claude/angular-practices/` (the version profile)
-2. Ask ONE question: **"What is the feature name and what does it do?"** (name + one sentence)
-3. **GATE:** Wait for the answer. Write no code until you have it.
+   - **`docs/plans/`** → if a plan for this feature exists, read it in full; it is the source of
+     truth for scope, File Map, and task Interfaces (written by `/plan` per
+     `.claude/references/plan-spec.md`)
+   - **Open the Reference Example files** listed in `project-rules.md` (best existing service / page /
+     component / spec) and mirror their style — the strongest signal for matching real conventions
+2. Establish the feature:
+   - **If a plan was found** → the name and scope come from the plan's Goal. Do NOT re-ask them;
+     just confirm: **"Found plan `docs/plans/<file>` — follow it? (yes / no)"**.
+   - **If no plan** → ask ONE question: **"What is the feature name and what does it do?"** (name +
+     one sentence). If anything else about scope is unclear, ask it in the same batch — don't guess.
+     When the feature looks large (several screens or endpoints), add one line:
+     *"This looks sizeable — consider running `/plan` first for a reviewed task breakdown."* — then
+     continue anyway if the user wants to.
+3. **GATE:** Wait for the answer / confirmation. Write no code until you have it.
 
 ---
 
 ## Phase 1 — Scaffold
 
-1. Create the full folder + empty-file structure for `features/{feature-name}/`
-   (model, service, routes, pages/, components/ — match the layout in project-rules.md).
+1. Create the full folder + empty-file structure. **If a plan was found in Phase 0, create exactly
+   the files in the plan's File Map** (it already reflects the project's real layout). Otherwise
+   follow `.claude/references/feature-structure.md` → Folder Structure, using the project's actual
+   layout and folder names from `project-rules.md` (the reference file's tree is only the default shape).
 2. Print the created file tree.
 3. **GATE:** "✅ Folder structure OK? Continue to Phase 2 (Model + Service)? (yes / no)"
 
 ---
 
+> Follow `.claude/references/feature-structure.md` → Coding Rules throughout Phase 2a and 2b
+> (`OnPush`, subscription teardown per profile, no `any`, project's forms approach, no hardcoded
+> URLs, wrapper priority — never import a raw UI-library component when a wrapper exists).
+
+> If a plan was found in Phase 0, implement each piece from its tasks: use the exact model/DTO
+> shapes and service signatures declared in the tasks' `Interfaces: Consumes/Produces` blocks.
+
 ## Phase 2a — Implement Model + Service
 
-1. Write `models/{feature}.model.ts` — interfaces mirroring the backend's actual response shape from `API_CONTRACT.md` (envelope, raw DTO, or GraphQL type — per `project-rules.md`).
+1. Write `models/{feature}.model.ts` — interfaces mirroring the backend's actual response shape from `API_CONTRACT.md` (envelope, raw DTO, or GraphQL type — per `project-rules.md`), matching the plan's declared types if a plan exists.
 2. Write `services/{feature}.service.ts` — data-access methods returning `Observable<T>` typed with the project's response shape,
    following the DI/idiom of the version profile.
 3. Print the two files.
@@ -68,10 +95,14 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
 
 ## Phase 3 — Tests + Context
 
-1. Write tests following `/write-tests`:
+1. **Verify the build first**: `ng build` / `npx tsc --noEmit` and `ng lint`. Fix any failure
+   immediately — a broken build makes test results meaningless, and this must not slip through to
+   Phase 4 or the commit in Phase 5.
+2. Write tests by dispatching the **`angular-test-writer`** agent (isolated — it follows
+   `.claude/references/test-spec.md`), or run `/write-tests` inline:
    - `{feature}.service.spec.ts` (mock HttpClient: success + error + empty per method)
    - `{feature}-list.component.spec.ts` (mock service: render + interaction + loading + error)
-2. **Harness loop — tests (automated within this phase, max 3 rounds):**
+3. **Harness loop — tests (automated within this phase, max 3 rounds):**
    ```
    round = 1
    while round <= 3:
@@ -84,14 +115,15 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
      GATE: "❌ Tests still failing after 3 rounds. Exiting cycle — handle manually."
      → exit the automated cycle
    ```
-3. After tests pass, write the feature's `CONTEXT.md` in the same folder created in Phase 1 (per `/write-context`).
-4. **GATE:** "✅ Tests pass (round {n}) + CONTEXT.md written. Continue to Phase 4 (Review)? (yes / no)"
+4. After tests pass, write the feature's `CONTEXT.md` in the same folder created in Phase 1 (per `/write-context`).
+5. **GATE:** "✅ Build/lint clean + tests pass (round {n}) + CONTEXT.md written. Continue to Phase 4 (Review)? (yes / no)"
 
 ---
 
 ## Phase 4 — Review + Harness
 
-1. Run the full `/review-pr` checklist (all 8 categories).
+1. Review by dispatching the **`angular-reviewer`** agent (isolated), or run `/review-pr` inline —
+   both apply `.claude/references/review-checklist.md` (all dimensions).
 2. Print the result: count of 🔴 blockers, 🟡 suggestions, 🟢 good parts.
 3. If 0 blockers → skip the loop, go straight to the Phase 4 gate.
 4. If there are blockers:

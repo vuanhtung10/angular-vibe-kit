@@ -48,8 +48,12 @@ The version-matched best-practice file is in `.claude/angular-practices/`
 4. **Find the best-example files** — the most complete, idiomatic feature to use as a
    reference template. Pick the best example for each of: a service, a smart/page
    component, a dumb component, a test spec. Verify each path exists.
-5. Classify each finding: `standard` / `below-standard` / `uncertain`.
-6. Print a short findings summary (3–5 lines) + the chosen best-example files.
+5. **Detect the commit convention** — run `git log --oneline -50` (skip if no git history) and infer:
+   - **Prefix**: a consistent leading token before the type (e.g. `VIVAS_feat(...)` → prefix `VIVAS_`); none if not present.
+   - **Language**: the language of commit subjects (`vi` / `en`).
+   - **Scope source**: the folder level scopes come from (e.g. `src/app/features/<scope>` or `src/app/modules/<scope>`), based on the detected Folder Structure.
+6. Classify each finding: `standard` / `below-standard` / `uncertain`.
+7. Print a short findings summary (3–5 lines) + the chosen best-example files.
 
 ## Stage 1: Ask ALL Open Questions at Once
 1. Gather every `uncertain` item across ALL seven files into a single list
@@ -58,6 +62,8 @@ The version-matched best-practice file is in `.claude/angular-practices/`
    - **Wrapper auto-detection**: if wrappers were detected in Stage 0, confirm for each:
      (a) which library component it wraps, (b) custom additions, (c) is it required (BLOCKER) or preferred (SUGGESTION).
      Default if team does not answer: treat as SUGGESTION.
+   - **Commit convention**: if the prefix or language is ambiguous from `git log`, confirm them
+     (default: no prefix, language vi).
 2. Ask them as ONE grouped batch of multiple-choice questions.
 3. **WAIT** for the answers. Do not write any file until the batch is answered.
 4. If nothing is uncertain, say so and proceed directly to Stage 2.
@@ -69,7 +75,7 @@ placeholder with real content. Do NOT stop between files.
 1. **CLAUDE.md** (root) — `Read first` links, `Common commands` from `package.json` scripts, `Runtime and tooling` from detected stack, `High-level architecture` (2–4 line summary, link to docs/ARCHITECTURE.md). Under 200 lines.
 2. **docs/API_CONTRACT.md** — infer from existing `*.service.ts` calls; map endpoints → service methods → TypeScript interfaces. Mark gaps.
 3. **docs/ARCHITECTURE.md** — actual layer structure, routing/lazy-loading, state approach, HTTP/interceptor flow, auth strategy. Full detail here (not in CLAUDE.md).
-4. **.claude/rules/project-rules.md** — tech stack, naming, coding rules (actionable, not prose). Include the `## Precedence` section, the `## Reference Examples` section (best-example files from Stage 0 — paths that exist only), and the `## Coexistence Strategy` section (see below).
+4. **.claude/rules/project-rules.md** — tech stack, naming, coding rules (actionable, not prose). Include the `## Precedence` section, the `## Commit Convention` section (prefix / language / scope source detected in Stage 0 — default prefix none, language vi), the `## Reference Examples` section (best-example files from Stage 0 — paths that exist only), and the `## Coexistence Strategy` section (see below).
 5. **docs/PROJECT-STATUS.md** — snapshot: what exists, in progress, known issues, next tasks. Session counter = 1.
 6. **docs/DESIGN_SYSTEM.md** — UI library, design tokens (infer from styles/theme), shared/reusable components in whatever the project calls that folder (record the actual name), AND the **Wrapped Components** table (filled from Stage 0 detection, confirmed in Stage 1). If no wrappers found, OMIT the Wrapped Components section and add: `> This project uses UI library components directly — no shared wrappers.`
 7. **docs/decisions/** — one ADR per real decision confirmed (e.g. `001-state-management.md`, `002-auth-token-storage.md`). Only for actual decisions.

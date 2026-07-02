@@ -1,7 +1,7 @@
 {
   "name": "@tungvivas/angular-vibe-kit",
-  "version": "0.2.0",
-  "description": "Bootstrap a Vibe Coding workflow (CLAUDE.md, project docs, slash-commands) into any Angular project. Detects your Angular version and installs version-matched best-practice rules.",
+  "version": "0.3.0",
+  "description": "Bootstrap a Vibe Coding workflow (CLAUDE.md, project docs, slash-commands, skills, agents) into any Angular project. Detects your Angular version and installs version-matched best-practice rules.",
   "keywords": [
     "angular",
     "claude",
@@ -9,7 +9,10 @@
     "ai",
     "scaffold",
     "vibe-coding",
-    "slash-commands"
+    "slash-commands",
+    "skills",
+    "agents",
+    "subagents"
   ],
   "license": "MIT",
   "type": "module",
@@ -17,9 +20,12 @@
     "angular-vibe-kit": "bin/cli.js"
   },
   "files": [
+    "agents/",
     "bin/",
     "commands/",
     "practices/",
+    "references/",
+    "skills/",
     "templates/",
     "README.md",
     "LICENSE"

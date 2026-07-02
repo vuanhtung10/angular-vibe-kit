@@ -3,3 +3,6 @@ npm-debug.log*
 .DS_Store
 *.tgz
 .npmrc
+
+# Slides project (separate tool, not part of the npm package)
+slides/

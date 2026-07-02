@@ -13,15 +13,18 @@
  *     PROJECT-STATUS.md
  *     decisions/
  *   .claude/
- *     commands/                    ← 7 slash-commands
+ *     commands/                    ← 8 slash-commands
  *     angular-practices/<ver>.md   ← version-matched best-practice file
+ *     skills/                      ← skills Claude auto-applies (no command needed)
+ *     agents/                      ← Angular subagents (isolated context, run in parallel)
+ *     settings.json                ← allowlist (fewer prompts) + build-verify hook
  *     rules/
  *       project-rules.md           ← auto-loaded by Claude Code every session
  *
  * Generation (filling in actual content) happens later via /init in Claude Code.
  */
 
-import { existsSync, mkdirSync, readFileSync, copyFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve, relative } from "node:path";
 import { createRequire } from "node:module";
@@ -71,8 +74,11 @@ ${c.bold}Options${c.reset}
 ${c.bold}What gets created${c.reset}
   CLAUDE.md                       ← project root entry point
   docs/                           ← reference docs (fill in with /init)
-  .claude/commands/               ← 7 slash-commands
+  .claude/commands/               ← 8 slash-commands
   .claude/angular-practices/      ← version-matched best-practice file
+  .claude/skills/                 ← skills Claude auto-applies (no command needed)
+  .claude/agents/                 ← Angular subagents (isolated context, run in parallel)
+  .claude/settings.json           ← allowlist (fewer prompts) + build-verify hook
   .claude/rules/project-rules.md  ← auto-loaded every Claude Code session`);
 }
 
@@ -147,6 +153,76 @@ function copyDir(srcDir, destDir, cwd) {
   }
 }
 
+// Write generated content to a file, honoring --force / --dry-run like copyOne.
+function writeOne(content, dest, cwd) {
+  const rel = relative(cwd, dest);
+  if (existsSync(dest) && !flags.force) {
+    warn(`skip (exists): ${rel}`);
+    skipped++;
+    return;
+  }
+  if (flags.dryRun) {
+    log(`${c.dim}would create → ${rel}${c.reset}`);
+    copied++;
+    return;
+  }
+  ensureDir(dirname(dest));
+  writeFileSync(dest, content);
+  ok(rel);
+  copied++;
+}
+
+// Angular profile filename → human label for the skill description.
+// e.g. "v20plus.md" → "v20+", "v18-19.md" → "v18-19", "v17.md" → "v17"
+function profileLabel(practiceFile) {
+  return practiceFile.replace(/\.md$/, "").replace(/plus$/, "+");
+}
+
+// Detect the package manager from the target project's lockfile.
+function detectPackageManager(cwd) {
+  if (existsSync(join(cwd, "pnpm-lock.yaml"))) return "pnpm";
+  if (existsSync(join(cwd, "yarn.lock"))) return "yarn";
+  return "npm";
+}
+
+// Resolve the build-verify command for the Stop hook. Prefers a project "typecheck"
+// script; otherwise falls back to a fast type-check (npx tsc --noEmit). Returns null
+// only if there is no package.json at all.
+function buildVerifyCommand(cwd) {
+  const pkgPath = join(cwd, "package.json");
+  if (!existsSync(pkgPath)) return null;
+  const pm = detectPackageManager(cwd);
+  try {
+    const raw = readFileSync(pkgPath, "utf8").replace(/^﻿/, "");
+    const scripts = (JSON.parse(raw).scripts) || {};
+    if (scripts.typecheck) return pm === "npm" ? "npm run typecheck" : `${pm} typecheck`;
+  } catch { /* fall through to tsc */ }
+  // Fast type-check that works without an Angular-specific script.
+  // Swap for `ng build` / `${pm} run build` if you want full template checking.
+  return "npx tsc --noEmit";
+}
+
+// Build the .claude/settings.json object: a safe allowlist + (optionally) a Stop hook
+// that type-checks only when .ts/.html files changed since HEAD (skips question-only turns).
+function buildSettings(cwd) {
+  const settings = {
+    permissions: {
+      allow: [
+        "Bash(ng *)", "Bash(npm *)", "Bash(npx *)", "Bash(pnpm *)", "Bash(yarn *)",
+        "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)", "Bash(git show *)",
+      ],
+    },
+  };
+  const buildCmd = buildVerifyCommand(cwd);
+  if (buildCmd) {
+    const hookCmd = `git diff --quiet HEAD -- '*.ts' '*.html' || ${buildCmd}`;
+    settings.hooks = {
+      Stop: [{ hooks: [{ type: "command", command: hookCmd }] }],
+    };
+  }
+  return { settings, buildCmd };
+}
+
 // --- main -----------------------------------------------------------------
 function main() {
   if (flags.help) { printHelp(); return; }
@@ -208,7 +284,7 @@ function main() {
   copyDir(join(KIT_ROOT, "templates", "docs"), join(cwd, "docs"), cwd);
   log("");
 
-  // 5. .claude/commands/ → 7 slash-commands
+  // 5. .claude/commands/ → 8 slash-commands
   log(`${c.bold}Commands${c.reset} → .claude/commands/`);
   copyDir(join(KIT_ROOT, "commands"), join(claudeDir, "commands"), cwd);
   log("");
@@ -232,7 +308,50 @@ function main() {
   );
   log("");
 
-  // 8. summary
+  // 7b. .claude/references/ → shared source of truth for review/test (read by both commands & agents)
+  log(`${c.bold}References${c.reset} → .claude/references/ ${c.dim}(shared standards for commands + agents)${c.reset}`);
+  copyDir(join(KIT_ROOT, "references"), join(claudeDir, "references"), cwd);
+  log("");
+
+  // 8. .claude/skills/ → model-invoked skills (auto-applied by Claude, no command needed)
+  log(`${c.bold}Skills${c.reset} → .claude/skills/ ${c.dim}(auto-applied by Claude — no command needed)${c.reset}`);
+  const skillsDir = join(claudeDir, "skills");
+  const kitSkillsDir = join(KIT_ROOT, "skills");
+
+  // Static skills: copy each folder wholesale (preserves templates/ and references/ subfiles).
+  // angular-practices is the only generated one (needs profile injection) — handled below.
+  for (const skill of readdirSync(kitSkillsDir)) {
+    if (skill === "angular-practices") continue;
+    const src = join(kitSkillsDir, skill);
+    if (!statSync(src).isDirectory()) continue;
+    copyDir(src, join(skillsDir, skill), cwd);
+  }
+
+  // angular-practices: generated — inject the matched profile filename + label
+  const apTemplate = join(kitSkillsDir, "angular-practices", "SKILL.md");
+  if (existsSync(apTemplate)) {
+    const body = readFileSync(apTemplate, "utf8")
+      .replace(/\{\{PRACTICE_FILE\}\}/g, practice)
+      .replace(/\{\{NG_PROFILE_LABEL\}\}/g, profileLabel(practice));
+    writeOne(body, join(skillsDir, "angular-practices", "SKILL.md"), cwd);
+  } else {
+    err(`skill template missing in kit: angular-practices/SKILL.md`);
+  }
+  log("");
+
+  // 9. .claude/agents/ → Angular-specialized subagents (isolated context, run in parallel)
+  log(`${c.bold}Agents${c.reset} → .claude/agents/ ${c.dim}(isolated context — dispatch to run in background/parallel)${c.reset}`);
+  copyDir(join(KIT_ROOT, "agents"), join(claudeDir, "agents"), cwd);
+  log("");
+
+  // 10. .claude/settings.json → permission allowlist + Stop-hook build verify
+  log(`${c.bold}Settings${c.reset} → .claude/settings.json ${c.dim}(allowlist + build verify)${c.reset}`);
+  const { settings, buildCmd } = buildSettings(cwd);
+  if (!buildCmd) warn("no package.json found — writing permissions only (no build-verify hook)");
+  writeOne(JSON.stringify(settings, null, 2) + "\n", join(claudeDir, "settings.json"), cwd);
+  log("");
+
+  // 11. summary
   log(`${c.bold}Done.${c.reset} ${copied} file(s) created, ${skipped} skipped.`);
   if (skipped > 0 && !flags.force) log(`${c.dim}Re-run with --force to overwrite skipped files.${c.reset}`);
   log("");
@@ -240,6 +359,13 @@ function main() {
   log(`  1. Open this project in ${c.cyan}Claude Code${c.reset}.`);
   log(`  2. Run ${c.cyan}/init${c.reset} — it will scan your codebase and fill in all the docs.`);
   log(`  3. Each session: ${c.cyan}/start${c.reset} → work → ${c.cyan}/update-status${c.reset}.`);
+  log("");
+  log(`${c.dim}Skills in .claude/skills/ apply automatically when you write or review`);
+  log(`Angular code — no command needed to trigger them.`);
+  log(`Agents in .claude/agents/ run in an isolated context — ask Claude to use one`);
+  log(`(e.g. "use angular-build-fixer to fix this build error"), even in the background.`);
+  log(`settings.json pre-allows ng/npm/pnpm/yarn/git-read (fewer prompts) and type-checks`);
+  log(`at turn end only when .ts/.html changed. Remove its "hooks" block to disable.${c.reset}`);
 }
 
 main();

@@ -63,6 +63,14 @@ When guidance conflicts, follow this order top to bottom:
 - Do NOT hardcode the backend URL
 - Do NOT import UI library components directly in features when a wrapper exists in `shared/components/`
 
+## Commit Convention
+> Read by the `git-commit` skill and the `angular-git-workflow` agent. /init fills this from `git log`.
+- **Prefix**: {{none}}  <!-- prepended before <type>, e.g. "VIVAS_"; default: none -->
+- **Language**: {{vi}}  <!-- subject/body language for commits AND /explain output; default: vi -->
+- **Format**: `<prefix><type>(<scope>): <subject>`
+- **Scope source**: top-level folder under {{src/app/features | src/app/modules | ...}} of the changed files; multiple modules → omit scope
+- **Types**: feat, fix, refactor, docs, style, test, chore, perf, ci, build, revert
+
 ## Reference Examples
 > /init fills this with the best existing files to copy patterns from.
 > `/new-feature` opens these and mirrors their style.
