@@ -6,3 +6,8 @@ npm-debug.log*
 
 # Slides project (separate tool, not part of the npm package)
 slides/
+
+# Claude Code user-local overrides — do NOT commit per-user settings.
+# (Each developer's permissions / hooks / debug flags live in this file;
+# the kit's own settings.json + commands/skills/agents are still tracked.)
+.claude/settings.local.json
