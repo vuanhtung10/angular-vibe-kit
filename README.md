@@ -64,7 +64,7 @@ After install, open the project in **Claude Code**:
 ```
 
 `/init` generates, one file at a time (you review each):
-`CLAUDE.md` → `docs/API_CONTRACT.md` → `docs/ARCHITECTURE.md` →
+`CLAUDE.md` → `docs/api-contracts/` (index + one file per feature) → `docs/ARCHITECTURE.md` →
 `docs/PROJECT-RULES.md` → `docs/PROJECT-STATUS.md` → `docs/DESIGN_SYSTEM.md` →
 `docs/decisions/`.
 
@@ -73,24 +73,42 @@ Then every working session:
 | Command | When | Does |
 |---------|------|------|
 | `/start` | Start of session | Read docs, summarize progress, wait |
+| `/convert-srs` | Non-MD SRS source (PDF/DOCX/PPTX/XLSX/ảnh) | Wraps `markitdown` → split multi-module → index `docs/srs/` |
 | `/plan` | Large feature, before coding | Clarify → approaches → design → write task-by-task plan to `docs/plans/` |
-| `/new-feature` | New module | Scaffold → implement → test → docs |
+| `/new-feature` | New module — code only | Scaffold → implement. Tests/docs/review run separately via `/write-tests` / `/write-context` / `/write-api-contracts` / `/update-status` / `/review-pr` |
 | `/write-tests` | Code without tests | Service spec + component test |
 | `/write-context` | New/complex module | Create `CONTEXT.md` snapshot |
+| `/write-api-contracts` | New endpoints, contract drift | Sync `docs/api-contracts/<feature>.md` + Domains index from the feature's service code |
 | `/review-pr` | Before commit | Angular review checklist → 🔴/🟡/🟢 |
 | `/update-status` | End of session | Update `PROJECT-STATUS.md` + commit |
 | `/dev-cycle` | Whole feature | Gated end-to-end orchestrator |
 
-**Recommended flow for a sizeable feature:** `/plan` → review the plan doc → `/dev-cycle` (or
+**Recommended flow for a sizeable feature:** `/convert-srs` (only if your SRS arrives as a
+non-Markdown file — PDF/DOCX/PPT/XLSX/ảnh/audio/YouTube/ZIP/EPub) → `/plan` → review the plan doc → `/dev-cycle` (or
 `/new-feature`). `/plan` clarifies the requirement, weighs 2-3 approaches, and writes a reviewed,
-task-by-task plan to `docs/plans/`; `/dev-cycle` and `/new-feature` **auto-detect that plan** and
-follow its File Map and interfaces instead of re-deriving structure on the fly. Small features can
-skip `/plan` and go straight into `/dev-cycle` / `/new-feature`. The `/plan` workflow is adapted
-from [obra/superpowers](https://github.com/obra/superpowers) (MIT).
+task-by-task plan to `docs/plans/`; both `/dev-cycle` and `/new-feature` **auto-detect that plan**
+and follow its File Map and interfaces instead of re-deriving structure on the fly. Use
+`/dev-cycle` for the full gated pipeline (implement → test → review → wrap-up), `/new-feature` for
+code-only when you want to drive tests/docs/review manually. Small features can skip `/plan` and
+go straight into `/dev-cycle` / `/new-feature`. The `/plan` workflow is adapted from
+[obra/superpowers](https://github.com/obra/superpowers) (MIT).
 
-If your requirements come from a large multi-module SRS (e.g. a Word doc converted with `pandoc`
-into one big Markdown file), split out just the module you're building and save it under
-`docs/srs/<module-name>.md` (created by the installer — see `docs/srs/README.md`), then point
+If your requirements come in a non-Markdown format — Word `.docx`, PowerPoint, Excel, PDF spec,
+screenshot, audio, YouTube transcript, EPub, ZIP — convert to Markdown **first** using
+[Microsoft Markitdown](https://github.com/microsoft/markitdown) (preferred over `pandoc` for
+PDF/PPTX/XLSX/image-OCR; LLM-token-optimized output). Either run
+[`/convert-srs`](commands/convert-srs.md) (the kit's wrapper — it auto-splits multi-module sources
+and indexes `docs/srs/`) or call markitdown directly:
+
+```bash
+# one-time install on your dev machine (NOT in package.json — the Angular project stays pure Node)
+winget install astral-sh.uv && uv tool install "markitdown[all]"
+
+markitdown ./specs/order-management.pdf -o docs/srs/order-management.md
+```
+
+Then split out just the module you're building and save it under
+`docs/srs/<module-name>.md` (created by the installer — see `docs/srs/README.md`), and point
 `/plan` at that file instead of pasting the whole SRS.
 
 ---
@@ -124,7 +142,7 @@ both apply `.claude/references/test-spec.md`. The command runs it **inline**; th
 | Multi-phase feature build with gates | the **orchestrator** (`/dev-cycle`, `/new-feature`) — it dispatches the agents at the test & review phases |
 | Knowledge that should apply *whenever* you write code | the **skill** (auto — no trigger) |
 
-Five skills ship today:
+Six skills ship today:
 - **angular-practices** — points to your version-matched profile; auto-applies when
   writing/reviewing/refactoring Angular code.
 - **clarify-request** — normalizes vague prompts ("fix bug A", "thêm trường X") into a standard
@@ -136,6 +154,9 @@ Five skills ship today:
   explanation matches *this* project (version/UI library/state/folder layout — nothing hardcoded).
 - **git-commit** — generates conventional commit messages following your `## Commit Convention`
   in `project-rules.md` (prefix, language, and scope are per-project, filled by `/init`).
+- **srs-ingest** — detects when you have a non-Markdown SRS source (PDF, DOCX, PPTX, XLSX, image
+  with text, audio, YouTube URL) and points you at `/convert-srs` — it never edits `docs/srs/`
+  itself, only routes you to the command that does the conversion.
 
 ## Agents (parallel / isolated context)
 
@@ -237,9 +258,11 @@ Works for any UI library — PrimeNG, Material, ng-zorro, ng-bootstrap, custom.
 your-angular-app/
 ├── CLAUDE.md                       # generated/filled by /init
 ├── .claude/
-│   ├── commands/                   # 9 slash-commands (copied by installer)
+│   ├── commands/                   # 11 slash-commands (copied by installer)
 │   │   ├── init.md  start.md  plan.md  new-feature.md  review-pr.md
-│   │   ├── write-tests.md  write-context.md  update-status.md  dev-cycle.md
+│   │   ├── write-tests.md  write-context.md  write-api-contracts.md
+│   │   ├── update-status.md  dev-cycle.md  convert-srs.md
+│   │   └── # convert-srs.md wraps `markitdown` (PDF/DOCX/PPTX/XLSX/ảnh) → `docs/srs/`
 │   ├── angular-practices/          # 1 version-matched profile (copied)
 │   │   └── v17.md
 │   ├── references/                 # shared SoT — both commands & agents read these
@@ -257,9 +280,11 @@ your-angular-app/
 │   │   ├── explain/               #   → explains code/concepts/flows in your project's language
 │   │   │   ├── SKILL.md
 │   │   │   └── templates/vi.md
-│   │   └── git-commit/            #   → conventional commits per your Commit Convention
-│   │       ├── SKILL.md
-│   │       └── references/conventions.md
+│   │   ├── git-commit/            #   → conventional commits per your Commit Convention
+│   │   │   ├── SKILL.md
+│   │   │   └── references/conventions.md
+│   │   └── srs-ingest/            #   → detects non-MD SRS mentions, points at /convert-srs
+│   │       └── SKILL.md
 │   ├── agents/                     # 8 Angular subagents (isolated context, run in parallel)
 │   │   ├── angular-reviewer.md  angular-build-fixer.md  angular-debugger.md
 │   │   ├── angular-test-writer.md  angular-a11y-auditor.md  angular-onboarding.md
@@ -268,7 +293,10 @@ your-angular-app/
 │   └── rules/
 │       └── project-rules.md        # auto-loaded every session (filled by /init)
 └── docs/
-    ├── ARCHITECTURE.md  API_CONTRACT.md  DESIGN_SYSTEM.md   # filled by /init
+    ├── ARCHITECTURE.md  DESIGN_SYSTEM.md                     # filled by /init
+    ├── api-contracts/               # filled by /init — README.md index + one file per feature
+    │   ├── README.md                #   base URL, response envelope, auth, domains index
+    │   └── <feature>.md             #   one per feature (endpoints + DTOs)
     ├── PROJECT-STATUS.md                                     # filled by /init
     ├── decisions/                                            # filled by /init
     ├── srs/                         # created by installer — drop your split SRS excerpts here

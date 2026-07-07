@@ -8,12 +8,12 @@
  *   CLAUDE.md                      ← project root (entry point)
  *   docs/                          ← reference docs
  *     ARCHITECTURE.md
- *     API_CONTRACT.md
+ *     api-contracts/               ← README.md index + one file per feature (filled by /init)
  *     DESIGN_SYSTEM.md
  *     PROJECT-STATUS.md
  *     decisions/
  *   .claude/
- *     commands/                    ← 8 slash-commands
+ *     commands/                    ← 11 slash-commands
  *     angular-practices/<ver>.md   ← version-matched best-practice file
  *     skills/                      ← skills Claude auto-applies (no command needed)
  *     agents/                      ← Angular subagents (isolated context, run in parallel)
@@ -74,7 +74,7 @@ ${c.bold}Options${c.reset}
 ${c.bold}What gets created${c.reset}
   CLAUDE.md                       ← project root entry point
   docs/                           ← reference docs (fill in with /init)
-  .claude/commands/               ← 8 slash-commands
+  .claude/commands/               ← 11 slash-commands
   .claude/angular-practices/      ← version-matched best-practice file
   .claude/skills/                 ← skills Claude auto-applies (no command needed)
   .claude/agents/                 ← Angular subagents (isolated context, run in parallel)
@@ -284,7 +284,7 @@ function main() {
   copyDir(join(KIT_ROOT, "templates", "docs"), join(cwd, "docs"), cwd);
   log("");
 
-  // 5. .claude/commands/ → 8 slash-commands
+  // 5. .claude/commands/ → 11 slash-commands
   log(`${c.bold}Commands${c.reset} → .claude/commands/`);
   copyDir(join(KIT_ROOT, "commands"), join(claudeDir, "commands"), cwd);
   log("");

@@ -34,7 +34,7 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
    - `CLAUDE.md`
    - `.claude/rules/project-rules.md` → naming, structure, Coexistence, **Reference Examples**
    - `docs/ARCHITECTURE.md`
-   - `docs/API_CONTRACT.md`
+   - `docs/api-contracts/README.md` → shared Base URL, Response Envelope, Auth
    - `docs/DESIGN_SYSTEM.md` → shared components + Wrapped Components table
    - `.claude/angular-practices/` (the version profile)
    - **`docs/plans/`** → if a plan for this feature exists, read it in full; it is the source of
@@ -74,7 +74,7 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
 
 ## Phase 2a — Implement Model + Service
 
-1. Write `models/{feature}.model.ts` — interfaces mirroring the backend's actual response shape from `API_CONTRACT.md` (envelope, raw DTO, or GraphQL type — per `project-rules.md`), matching the plan's declared types if a plan exists.
+1. Write `models/{feature}.model.ts` — interfaces mirroring the backend's actual response shape from `docs/api-contracts/{feature}.md` if it exists, else the envelope in `docs/api-contracts/README.md` (raw DTO or GraphQL type — per `project-rules.md`), matching the plan's declared types if a plan exists.
 2. Write `services/{feature}.service.ts` — data-access methods returning `Observable<T>` typed with the project's response shape,
    following the DI/idiom of the version profile.
 3. Print the two files.
@@ -151,7 +151,9 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
 ## Phase 5 — Wrap up
 
 1. Update `docs/PROJECT-STATUS.md` (per `/update-status` — move to Completed, bump session).
-2. Update `docs/API_CONTRACT.md` if new endpoints were used.
+2. Sync `docs/api-contracts/{feature}.md` per `/write-api-contracts {feature}` — only if endpoints
+   changed in this feature (creates the file and adds a row to `docs/api-contracts/README.md`'s
+   Domains table if no file yet). The command merges intelligently, so re-running it is always safe.
 3. Generate a commit message: `feat({feature-name}): {description} + tests + docs`.
 4. Print the git command for the user to run:
    ```
