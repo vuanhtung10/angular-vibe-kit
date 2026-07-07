@@ -32,7 +32,7 @@ Do NOT restate project rules here — point at the sources every task implicitly
 - Version idioms (DI, control flow, Signals/RxJS): `.claude/angular-practices/<version>.md`
 - Folder shape, implementation order, coding rules: `.claude/references/feature-structure.md`
 - Wrapper priority: `docs/DESIGN_SYSTEM.md` → Wrapped Components table
-- Endpoints + payload shapes: `docs/API_CONTRACT.md`
+- Endpoints + payload shapes: `docs/api-contracts/<feature>.md` (shared envelope/auth: `docs/api-contracts/README.md`)
 
 <Then list ONLY feature-specific constraints the user stated, one line each, verbatim —
 e.g. "must work offline", "max 1 request per keystroke", "reuse OrderService pagination".>
@@ -48,7 +48,7 @@ Lock decomposition in before writing tasks. Use the **project's actual layout** 
 
 | Action | Path | Responsibility |
 |--------|------|----------------|
-| Create | src/app/features/<feature>/models/<feature>.model.ts | DTOs mirroring API_CONTRACT |
+| Create | src/app/features/<feature>/models/<feature>.model.ts | DTOs mirroring docs/api-contracts/<feature>.md |
 | Create | src/app/features/<feature>/services/<feature>.service.ts | Data access only |
 | Modify | src/app/app.routes.ts | Register lazy route |
 | Test   | src/app/features/<feature>/services/<feature>.service.spec.ts | Per test-spec.md |
@@ -101,7 +101,7 @@ own). Fold setup, config, and docs steps into the task whose deliverable needs t
    task that implements it. A requirement with no task = add the task.
 2. **Placeholder scan** — search the plan for every pattern in the list above.
 3. **Type consistency** — types, signatures, and property names used in later tasks match what
-   earlier tasks define, AND match the shapes in `docs/API_CONTRACT.md`.
+   earlier tasks define, AND match the shapes in `docs/api-contracts/<feature>.md`.
 4. **Wrapper check** — every UI element in the plan uses the wrapper from the Wrapped
    Components table when one exists (a raw library import where a wrapper exists is a plan bug).
 5. **Layout check** — every path in the File Map matches the project's real folder layout from

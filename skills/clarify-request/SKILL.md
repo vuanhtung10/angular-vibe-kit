@@ -48,7 +48,7 @@ Never ask what the project already answers. Look here first:
 | Missing info | Where to look |
 |--------------|---------------|
 | Which file/component is "X" | `Glob`/`Grep` for the name; feature folders; `docs/ARCHITECTURE.md` |
-| Does the API return that field | `docs/API_CONTRACT.md`, the feature's `services/*.ts` + `models/*.ts` |
+| Does the API return that field | `docs/api-contracts/<feature>.md`, the feature's `services/*.ts` + `models/*.ts` |
 | Which wrapper to use for new UI | `docs/DESIGN_SYSTEM.md` → Wrapped Components table |
 | Project conventions / do-not-touch | `.claude/rules/project-rules.md` (Precedence, Coexistence) |
 | What was recently worked on (bug context) | `docs/PROJECT-STATUS.md`, `git log` if permitted, feature `CONTEXT.md` |
@@ -65,7 +65,7 @@ scope + constraints (what must NOT be touched) · done-criteria (how we know it'
 | Intent | Additional required fields |
 |--------|---------------------------|
 | **bug** | repro steps · error message/log · since when (after which change?) · which screen/module |
-| **feature** | SRS or description · screens in scope · endpoints (already in API_CONTRACT?) · relation to existing features · permissions |
+| **feature** | SRS or description · screens in scope · endpoints (already in `docs/api-contracts/<feature>.md`?) · relation to existing features · permissions |
 | **small-edit** | data type of the new field · validation rules · where it shows (form / table / both) · does the API already return it |
 | **review** | which page/component · concrete symptom (slow on load? scroll? typing?) · expected measure |
 

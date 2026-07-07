@@ -7,7 +7,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## Read first
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — layers, routing, state, request flow
-- [docs/API_CONTRACT.md](docs/API_CONTRACT.md) — endpoints the frontend calls + payload shapes
+- [docs/api-contracts/](docs/api-contracts/README.md) — endpoints the frontend calls + payload shapes, one file per feature
 - [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — UI library, theme, shared components
 - [docs/PROJECT-STATUS.md](docs/PROJECT-STATUS.md) — current progress, next tasks, warnings
 - `.claude/angular-practices/` — Angular version idioms for this project (auto-detected)
@@ -49,7 +49,7 @@ npx tsc --noEmit
 ## When updating docs
 If behavior changes, update the related docs in the same commit:
 - `docs/PROJECT-STATUS.md` for session progress
-- `docs/API_CONTRACT.md` for endpoint changes
+- `docs/api-contracts/<feature>.md` for endpoint changes
 - `docs/DESIGN_SYSTEM.md` for UI/token changes
 - Feature `CONTEXT.md` for non-obvious module behavior
 - `docs/decisions/` for meaningful architectural decisions

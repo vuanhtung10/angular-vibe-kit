@@ -6,7 +6,7 @@ docs only — never modifies application source files.
 The skeleton files already exist at their correct locations:
   CLAUDE.md                        ← project root (keep under 200 lines)
   docs/ARCHITECTURE.md
-  docs/API_CONTRACT.md
+  docs/api-contracts/README.md     ← index + shared envelope/auth; one file per feature alongside it
   docs/DESIGN_SYSTEM.md
   docs/PROJECT-STATUS.md
   docs/decisions/
@@ -18,7 +18,7 @@ The version-matched best-practice file is in `.claude/angular-practices/`
 ## Core Principles
 - **Infer from code first.** Read before asking — do not ask about things you can determine.
 - **Batch the questions.** Collect EVERY uncertain point across ALL files and ask them in ONE round (Stage 1). Do not drip-feed questions file by file.
-- **Then write everything.** After the answers come back, write all 7 files in one pass (Stage 2) — no per-file stops.
+- **Then write everything.** After the answers come back, write all files in one pass (Stage 2) — no per-file stops.
 - **Review is at the end.** The human review happens once, after the summary (Stage 4) — not between files.
 - **Precedence: codebase first, then the BP profile.** A valid project convention wins over the Angular best-practice profile; the profile applies only where the project has no convention or is objectively below standard (new code only). Legacy is never refactored. Write this exact precedence into `project-rules.md` (the `## Precedence` section).
 - **CLAUDE.md stays under 200 lines.** Link to docs/ for details, do not inline everything.
@@ -56,7 +56,7 @@ The version-matched best-practice file is in `.claude/angular-practices/`
 7. Print a short findings summary (3–5 lines) + the chosen best-example files.
 
 ## Stage 1: Ask ALL Open Questions at Once
-1. Gather every `uncertain` item across ALL seven files into a single list
+1. Gather every `uncertain` item across ALL files into a single list
    (e.g. "both NgRx and Signals present — which is primary?", "response envelope shape?",
    "auth model?", "which forms approach?", "confirm this legacy do-not-touch list").
    - **Wrapper auto-detection**: if wrappers were detected in Stage 0, confirm for each:
@@ -73,7 +73,9 @@ Using the scan + the answers, write all files in this order. Replace every `{{..
 placeholder with real content. Do NOT stop between files.
 
 1. **CLAUDE.md** (root) — `Read first` links, `Common commands` from `package.json` scripts, `Runtime and tooling` from detected stack, `High-level architecture` (2–4 line summary, link to docs/ARCHITECTURE.md). Under 200 lines.
-2. **docs/API_CONTRACT.md** — infer from existing `*.service.ts` calls; map endpoints → service methods → TypeScript interfaces. Mark gaps.
+2. **docs/api-contracts/** — one file per feature/domain, grouped by the project's actual feature folders (e.g. `src/app/features/<feature>/`):
+   - For each feature with services, infer from its `*.service.ts` calls; map endpoints → service methods → TypeScript interfaces into `docs/api-contracts/<feature>.md` (table + interfaces, same shape as the shipped example). Mark gaps.
+   - Write the shared Base URL / Response Envelope / Auth sections **once**, plus the Domains index table (one row per feature file), into `docs/api-contracts/README.md`.
 3. **docs/ARCHITECTURE.md** — actual layer structure, routing/lazy-loading, state approach, HTTP/interceptor flow, auth strategy. Full detail here (not in CLAUDE.md).
 4. **.claude/rules/project-rules.md** — tech stack, naming, coding rules (actionable, not prose). Include the `## Precedence` section, the `## Commit Convention` section (prefix / language / scope source detected in Stage 0 — default prefix none, language vi), the `## Reference Examples` section (best-example files from Stage 0 — paths that exist only), and the `## Coexistence Strategy` section (see below).
 5. **docs/PROJECT-STATUS.md** — snapshot: what exists, in progress, known issues, next tasks. Session counter = 1.
@@ -102,7 +104,8 @@ Print a summary so I can review everything at once:
 | File | Status | Key content / decisions captured |
 |------|--------|----------------------------------|
 | CLAUDE.md | created/updated | ... |
-| docs/API_CONTRACT.md | created/updated | ... |
+| docs/api-contracts/README.md | created/updated | index + N feature files |
+| docs/api-contracts/<feature>.md (× N) | created/updated | ... |
 | docs/ARCHITECTURE.md | created/updated | ... |
 | .claude/rules/project-rules.md | created/updated | precedence + coexistence + reference examples |
 | docs/PROJECT-STATUS.md | created/updated | ... |

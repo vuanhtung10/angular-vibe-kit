@@ -70,7 +70,7 @@ valid choice, say so rather than blocking.
 ### 10. Documentation
 - [ ] New feature: `CONTEXT.md` created inside the feature folder
 - [ ] Logic changed: `CONTEXT.md` Refactor Log updated (append only)
-- [ ] Endpoint changed: `docs/API_CONTRACT.md` updated
+- [ ] Endpoint changed: `docs/api-contracts/<feature>.md` updated
 - [ ] `docs/PROJECT-STATUS.md` updated
 
 ## Output format

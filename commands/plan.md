@@ -45,7 +45,7 @@ Read, in this order:
 - `CLAUDE.md`
 - `.claude/rules/project-rules.md` → Precedence, naming, structure, Coexistence, **Reference Examples**
 - `docs/ARCHITECTURE.md` → where this feature fits
-- `docs/API_CONTRACT.md` → endpoints + payload shapes this feature will touch
+- `docs/api-contracts/README.md` (shared Base URL/envelope/auth) and `docs/api-contracts/{feature}.md` if it exists → endpoints + payload shapes this feature will touch
 - `docs/DESIGN_SYSTEM.md` → shared components + **Wrapped Components table**
 - `.claude/angular-practices/` → the version profile
 - **Open the Reference Example files** listed in `project-rules.md` (best existing service / page /
@@ -90,7 +90,8 @@ Read, in this order:
    only if nuanced): architecture & where it sits, data flow, components (smart/dumb split),
    error/loading/empty handling, testing scope.
 2. Note explicitly which **shared wrappers** the UI will use (from the Wrapped Components table) and
-   which **endpoints** from `API_CONTRACT.md` it consumes.
+   which **endpoints** from `docs/api-contracts/{feature}.md` (or `README.md` if the feature has no
+   file yet) it consumes.
 3. **GATE (skip if in Plan Mode — see below):** "✅ Design OK? Write the plan? (yes / revise)" — WAIT.
    There is no separate design file — once approved, the design goes straight into the plan header.
    **If in Plan Mode**, don't ask this separately — go straight to Phase E; `ExitPlanMode` there is
@@ -107,7 +108,7 @@ Read, in this order:
    Order (Model → Service → Routes → Pages → Components → Tests), each with `Files:`,
    `Interfaces: Consumes/Produces`, and concrete steps with real code — **no placeholders**.
 3. Run the **Self-Review checklist** from `plan-spec.md` (requirement coverage, placeholder scan,
-   type consistency vs. `API_CONTRACT.md`, wrapper check, layout check). Fix issues inline. Do this
+   type consistency vs. `docs/api-contracts/{feature}.md`, wrapper check, layout check). Fix issues inline. Do this
    BEFORE anything gets written below — either route commits the reviewed version.
 
 **Not in Plan Mode:**

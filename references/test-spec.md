@@ -12,7 +12,7 @@
 ## Step 1: Read before writing
 - Read the feature's source: model, service, page components, presentational components, guards, pipes, resolvers.
 - Read the feature's `CONTEXT.md` (if present) for trade-offs and edge cases.
-- Read `docs/API_CONTRACT.md` for expected request/response shapes.
+- Read `docs/api-contracts/<feature>.md` (or `docs/api-contracts/README.md` for the shared envelope if the feature has no file yet) for expected request/response shapes.
 - Identify every code path: happy path, not-found, validation failure, loading/error/empty states, branches.
 
 ## Step 2: Service unit tests — `{feature}.service.spec.ts`
