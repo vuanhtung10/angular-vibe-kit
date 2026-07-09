@@ -16,11 +16,13 @@ standard (new code only); legacy modules are never refactored.
 
 After finishing each phase, you MUST:
 1. Print a short summary of what was just done.
-2. Ask exactly: **"✅ Continue to Phase X? (yes / no)"**
-3. Then WAIT. Do not proceed on silence, timeout, or assumption.
-4. If the user replies **yes / ok / continue / tiếp** → move to the next phase.
-5. If the user replies **anything else** (no / stop / "sửa lại ..." / a change request / a question)
-   → **EXIT the automated cycle immediately.** Drop into normal interactive mode and
+2. Use the **AskUserQuestion** tool to raise the gate — never ask a gate question as plain chat
+   text. Header `"Gate"`, options `"Continue"` (move to the next phase) and `"Stop / change
+   something"` (exit the cycle). Each gate below gives the exact question text to pass.
+3. WAIT for the popup answer. Do not proceed on silence, timeout, or assumption.
+4. If the user picks **Continue** → move to the next phase.
+5. If the user picks **Stop / change something** (or answers via "Other" with a change request /
+   a question) → **EXIT the automated cycle immediately.** Drop into normal interactive mode and
    do whatever the user asks. Do NOT try to resume the cycle unless the user explicitly
    says to continue.
 
@@ -44,12 +46,13 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
      component / spec) and mirror their style — the strongest signal for matching real conventions
 2. Establish the feature:
    - **If a plan was found** → the name and scope come from the plan's Goal. Do NOT re-ask them;
-     just confirm: **"Found plan `docs/plans/<file>` — follow it? (yes / no)"**.
+     confirm via **AskUserQuestion** — question: "Found plan `docs/plans/<file>` — follow it?",
+     options: "Follow this plan" / "No — let me clarify first".
    - **If no plan** → ask ONE question: **"What is the feature name and what does it do?"** (name +
-     one sentence). If anything else about scope is unclear, ask it in the same batch — don't guess.
-     When the feature looks large (several screens or endpoints), add one line:
-     *"This looks sizeable — consider running `/plan` first for a reviewed task breakdown."* — then
-     continue anyway if the user wants to.
+     one sentence — open-ended, so this stays a plain chat question). If anything else about scope
+     is unclear, ask it in the same batch — don't guess. When the feature looks large (several
+     screens or endpoints), add one line: *"This looks sizeable — consider running `/plan` first
+     for a reviewed task breakdown."* — then continue anyway if the user wants to.
 3. **GATE:** Wait for the answer / confirmation. Write no code until you have it.
 
 ---
@@ -61,7 +64,7 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
    follow `.claude/references/feature-structure.md` → Folder Structure, using the project's actual
    layout and folder names from `project-rules.md` (the reference file's tree is only the default shape).
 2. Print the created file tree.
-3. **GATE:** "✅ Folder structure OK? Continue to Phase 2 (Model + Service)? (yes / no)"
+3. **GATE:** AskUserQuestion — question: "Folder structure OK? Continue to Phase 2 (Model + Service)?", options: "Continue" / "Stop / change something".
 
 ---
 
@@ -78,7 +81,7 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
 2. Write `services/{feature}.service.ts` — data-access methods returning `Observable<T>` typed with the project's response shape,
    following the DI/idiom of the version profile.
 3. Print the two files.
-4. **GATE:** "✅ Model + Service OK? Continue to Phase 2b (Routes + UI)? (yes / no)"
+4. **GATE:** AskUserQuestion — question: "Model + Service OK? Continue to Phase 2b (Routes + UI)?", options: "Continue" / "Stop / change something".
    > This gate matters most — a wrong type/endpoint here breaks every component after it.
 
 ---
@@ -89,7 +92,7 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
 2. Write page (smart) components — data, loading/error/empty states.
 3. Write presentational (dumb) components — inputs/outputs only.
 4. Print a summary of files written.
-5. **GATE:** "✅ UI components OK? Continue to Phase 3 (Tests)? (yes / no)"
+5. **GATE:** AskUserQuestion — question: "UI components OK? Continue to Phase 3 (Tests)?", options: "Continue" / "Stop / change something".
 
 ---
 
@@ -116,7 +119,7 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
      → exit the automated cycle
    ```
 4. After tests pass, write the feature's `CONTEXT.md` in the same folder created in Phase 1 (per `/write-context`).
-5. **GATE:** "✅ Build/lint clean + tests pass (round {n}) + CONTEXT.md written. Continue to Phase 4 (Review)? (yes / no)"
+5. **GATE:** AskUserQuestion — question: "Build/lint clean + tests pass (round {n}) + CONTEXT.md written. Continue to Phase 4 (Review)?", options: "Continue" / "Stop / change something".
 
 ---
 
@@ -127,9 +130,10 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
 2. Print the result: count of 🔴 blockers, 🟡 suggestions, 🟢 good parts.
 3. If 0 blockers → skip the loop, go straight to the Phase 4 gate.
 4. If there are blockers:
-   - **GATE:** "🔴 {n} blockers found. Auto-fix and re-review? (yes / no)"
-     - NO → exit the automated cycle; user fixes manually.
-     - YES → **Harness loop — review (max 3 rounds):**
+   - **GATE:** AskUserQuestion — question: "{n} blockers found. Auto-fix and re-review?", options:
+     "Auto-fix and re-review" / "Stop — I'll fix manually".
+     - "Stop — I'll fix manually" → exit the automated cycle; user fixes manually.
+     - "Auto-fix and re-review" → **Harness loop — review (max 3 rounds):**
        ```
        round = 1
        while round <= 3:
@@ -144,7 +148,7 @@ Never skip a gate. Never batch multiple phases past a gate. The user is always i
          → exit the automated cycle
        ```
 5. 🟡 Suggestions are NOT blocking — list them so the user can decide later.
-6. **GATE:** "✅ Review clean (0 blockers after {n} rounds). Continue to Phase 5 (Wrap up)? (yes / no)"
+6. **GATE:** AskUserQuestion — question: "Review clean (0 blockers after {n} rounds). Continue to Phase 5 (Wrap up)?", options: "Continue" / "Stop / change something".
 
 ---
 

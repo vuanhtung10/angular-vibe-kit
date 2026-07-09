@@ -41,10 +41,15 @@ detects the *intent to bring a non-Markdown source into the kit* and points the 
      `winget install astral-sh.uv` rồi `uv tool install "markitdown[all]"`."* Let the user decide.
      Don't run installation yourself — that's the user's call on a global Python tool.
 
-2. **Ask one batched question** (multiple-choice where possible):
-   - Đường dẫn file? (người dùng có thể paste/kéo thả)
-   - File chứa 1 feature hay nhiều feature?
-   - Format là gì? (nếu user chưa nói)
+2. **Ask what's still missing.** File path is open text (no fixed option set fits it — keep it a
+   plain chat question the user can paste/drag into). For the bounded questions, use the
+   **AskUserQuestion** tool instead of plain text:
+   - Đường dẫn file? — plain text question.
+   - AskUserQuestion — "File chứa 1 feature hay nhiều feature?", options: "1 feature" / "Nhiều
+     feature — sẽ split".
+   - AskUserQuestion — "Format là gì?" (only if not already stated by the user), options: the
+     likely formats from the file extension/context, e.g. "PDF" / "Word (.docx)" / "Excel (.xlsx)"
+     / "Khác".
 
 3. **Pre-check `docs/srs/`** — does it exist? Are there existing files (so we don't clobber names)?
    Read `docs/srs/README.md` once if it exists, to honor any project-specific index convention.

@@ -62,11 +62,12 @@ Full rules and type/subject conventions: `.claude/skills/git-commit/references/c
    Staged files (N):
      M <path>
      A <path>
-
-   Commit? (yes/no/edit)
    ```
-7. **Execute after confirm**: `yes` → `git commit -m "..."`; `edit` → user tweaks then commit;
-   `no` → abort (keep staged).
+
+   Then use the **AskUserQuestion** tool — question: "Commit with this message?", options:
+   "Yes, commit" / "Edit the message" / "No, abort".
+7. **Execute after the popup answer**: "Yes, commit" → `git commit -m "..."`; "Edit the message" →
+   user tweaks (via "Other" or a follow-up) then commit; "No, abort" → abort (keep staged).
 
 ## Scope Detection (dynamic — no hardcoded table)
 Derive `<scope>` from the staged file paths + the project's **Folder Structure** in

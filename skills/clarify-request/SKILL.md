@@ -56,7 +56,11 @@ Never ask what the project already answers. Look here first:
 
 ## Step 3 — Ask ONE batched set of what's still missing
 
-Ask only the unfilled fields, all in one message, multiple-choice where possible.
+Ask only the unfilled fields via the **AskUserQuestion** tool, all in one batch (up to 4 questions
+per call — split into consecutive calls if there are more), multiple-choice wherever the answer
+space is bounded. Only fall back to a plain chat question for a field that is genuinely open text
+(e.g. an error message, a free-form description) — AskUserQuestion needs 2–4 concrete options, so
+don't force one where there isn't a real choice.
 Required fields by intent:
 
 **Common (all intents):** exact target (file/component/feature) · current vs. expected behavior ·
@@ -69,8 +73,9 @@ scope + constraints (what must NOT be touched) · done-criteria (how we know it'
 | **small-edit** | data type of the new field · validation rules · where it shows (form / table / both) · does the API already return it |
 | **review** | which page/component · concrete symptom (slow on load? scroll? typing?) · expected measure |
 
-If an answer reveals a new ambiguity, ask that one follow-up — don't guess silently, don't drip
-every question one at a time.
+If an answer reveals a new ambiguity, ask that one follow-up (via AskUserQuestion if it has a
+bounded answer set, plain text otherwise) — don't guess silently, don't drip every question one
+at a time.
 
 ## Step 4 — Print the brief, then route
 

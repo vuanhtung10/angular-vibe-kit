@@ -30,10 +30,12 @@ included.
 
 After a gated phase you MUST:
 1. Print a short summary of what was decided.
-2. Ask the gate question exactly as written for that phase.
-3. Then WAIT. Do not proceed on silence or assumption.
+2. Use the **AskUserQuestion** tool to raise the gate — never ask it as plain chat text. Each
+   phase below gives the exact question text and options to pass.
+3. WAIT for the popup answer. Do not proceed on silence or assumption.
 4. If the user approves → continue to the next phase.
-5. If the user asks for changes → revise in place and re-ask the same gate. Do not skip ahead.
+5. If the user asks for changes (via an option or "Other" free text) → revise in place and
+   re-ask the same gate. Do not skip ahead.
 
 Write NO code and scaffold NOTHING in any phase. The only file this command creates is the plan doc.
 
@@ -61,16 +63,18 @@ Read, in this order:
    `/plan` runs later. Do not spend questions on a feature that needs decomposition first.
 2. For an appropriately-scoped feature, ask the clarifying questions you need — purpose,
    constraints, success criteria, edge cases, which endpoints/screens are in scope.
-   - **Batch them** (ask all open questions in one message, like `/init` Stage 1). Do not drip one
-     question per message.
-   - Prefer multiple-choice / yes-no phrasing where possible.
+   - **Batch them via the AskUserQuestion tool** (like `/init` Stage 1) — up to 4 questions per
+     call, more than 4 → consecutive calls. Do not drip one question per message.
+   - Prefer multiple-choice / yes-no phrasing so each question fits AskUserQuestion's 2–4 fixed
+     options; only fall back to a plain chat question for something genuinely open-ended (e.g. a
+     free-form description) where "Other" wouldn't be the common case.
    - Don't ask what the docs already answer — pull it from Phase A instead.
 3. **Adaptive follow-up:** if an answer reveals a new ambiguity you didn't anticipate (e.g. the user
    mentions a status field that implies a workflow you need to understand), ask that **one**
-   follow-up question before the gate — don't silently guess, and don't revert to asking every
-   remaining question one at a time.
-4. **GATE:** "✅ Requirements clear? (yes / add more)" — WAIT for answers. Write nothing until you
-   have them.
+   follow-up question (via AskUserQuestion if it has a bounded answer set) before the gate — don't
+   silently guess, and don't revert to asking every remaining question one at a time.
+4. **GATE:** AskUserQuestion — question: "Requirements clear?", options: "Yes, clear" / "I need to
+   add more". WAIT for the answer. Write nothing until you have it.
 
 ---
 
@@ -80,7 +84,8 @@ Read, in this order:
    reuse an existing service's pagination vs. a new one; smart/dumb split granularity).
 2. Lead with your **recommendation and why**, framed against this project's conventions and version
    idioms — not generic advice.
-3. **GATE:** "✅ Which approach? (1 / 2 / 3 / other)" — WAIT.
+3. **GATE:** AskUserQuestion — question: "Which approach?", options: the 2–3 proposed approaches by
+   name (put your recommendation first). WAIT — "Other" covers a different idea entirely.
 
 ---
 
@@ -92,7 +97,8 @@ Read, in this order:
 2. Note explicitly which **shared wrappers** the UI will use (from the Wrapped Components table) and
    which **endpoints** from `docs/api-contracts/{feature}.md` (or `README.md` if the feature has no
    file yet) it consumes.
-3. **GATE (skip if in Plan Mode — see below):** "✅ Design OK? Write the plan? (yes / revise)" — WAIT.
+3. **GATE (skip if in Plan Mode — see below):** AskUserQuestion — question: "Design OK? Write the
+   plan?", options: "Yes, write the plan" / "Revise the design". WAIT.
    There is no separate design file — once approved, the design goes straight into the plan header.
    **If in Plan Mode**, don't ask this separately — go straight to Phase E; `ExitPlanMode` there is
    the approval.

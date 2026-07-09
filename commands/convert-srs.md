@@ -24,8 +24,9 @@ Markitdown vs. pandoc (the older README suggestion):
 
 After Phase 3 (multi-module detection), if the command splits the input, you MUST:
 1. Print the planned split (each detected module + proposed filename).
-2. Ask **"✅ Split as proposed? (yes / edit / cancel)"**.
-3. WAIT. Do not split on assumption.
+2. Use the **AskUserQuestion** tool — question: "Split as proposed?", options: "Yes, proceed" /
+   "Edit — I'll specify changes" / "Cancel — keep unsplit".
+3. WAIT for the popup answer. Do not split on assumption.
 
 The remaining phases are non-interactive — once the split is confirmed (or the input is single-module),
 the command runs straight through to handoff. There is only one human decision: the split plan.
@@ -141,7 +142,7 @@ the command runs straight through to handoff. There is only one human decision: 
 4. **Multiple modules (≥ 2 H1s)** → enter split mode.
    - **Propose one file per H1**, keeping sub-headings under the H1 in the same file.
    - Derive each filename by kebab-casing the H1 text. Strip noise (`# `, leading numbers like `5.`).
-   - **GATE:** print the planned split table and wait:
+   - **GATE:** print the planned split table, then use **AskUserQuestion**:
 
      ```
      [convert-srs] Detected 4 modules — proposed split:
@@ -151,14 +152,14 @@ the command runs straight through to handoff. There is only one human decision: 
      | 1 | Module 5 — Order Management          | docs/srs/module-5-order-management.md |
      | 2 | Module 6 — Invoicing                | docs/srs/module-6-invoicing.md        |
      | … | …                                   | …                                      |
-
-     ✅ Split as proposed? (yes / edit / cancel)
-       - yes    → proceed
-       - edit   → tell me which row(s) to merge / rename / drop
-       - cancel → keep the unsplit file (rename to docs/srs/<stem>.md), continue
      ```
 
-5. After yes:
+     AskUserQuestion — question: "Split as proposed?", options:
+       - "Yes, proceed" → proceed
+       - "Edit"         → tell me which row(s) to merge / rename / drop (use "Other" to type them)
+       - "Cancel"       → keep the unsplit file (rename to docs/srs/<stem>.md), continue
+
+5. After "Yes, proceed":
    - For each row, write that H1 + its descendants into the proposed file. Preserve the YAML front
      matter / image refs from the original.
    - For images: markitdown places them under an `_images/` folder next to the markdown — keep
@@ -206,11 +207,11 @@ Then **wait** for the user to either run `/plan` or ask a question.
 |-----------|----------|
 | `markitdown` missing | Phase 0 stops with the install hint above. |
 | `markitdown` exits non-zero (corrupt / encrypted PDF, unsupported codec) | Show last 20 lines of stderr, suggest `--use-ocr` or `--use-cu` for scanned PDFs. |
-| File is empty after convert | Print the empty size, ask: "File rỗng — có phải scan không? (y / n)". If yes, suggest OCR / Azure. |
-| Split produces a file that already exists | Confirm before overwriting: "File `<path>` đã tồn tại — ghi đè? (yes / merge / rename / skip)". |
+| File is empty after convert | Print the empty size, then AskUserQuestion — question: "File rỗng — có phải scan không?", options: "Có, scan" / "Không". If "Có", suggest OCR / Azure. |
+| Split produces a file that already exists | AskUserQuestion — question: "File `<path>` đã tồn tại — xử lý thế nào?", options: "Ghi đè" / "Merge" / "Rename" / "Skip". |
 | `docs/srs/` not yet created | Create it from `templates/docs/srs/README.md` before writing. |
-| User runs `/convert-srs` with no argument and nothing relevant in cwd | Ask one question: "Đường dẫn file SRS? (kéo thả file vào cửa sổ terminal nếu cần)". |
-| Input is a remote URL (YouTube / http) | Built-in handles YouTube transcripts; for HTTP, run `markitdown <url> ...` directly. Confirm before fetching. |
+| User runs `/convert-srs` with no argument and nothing relevant in cwd | Ask one question: "Đường dẫn file SRS? (kéo thả file vào cửa sổ terminal nếu cần)" — stays plain text; a file path has no fixed option set. |
+| Input is a remote URL (YouTube / http) | Built-in handles YouTube transcripts; for HTTP, AskUserQuestion — question: "Fetch from `<url>`?", options: "Yes, fetch" / "Cancel" — before running `markitdown <url> ...`. |
 
 ---
 

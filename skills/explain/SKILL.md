@@ -49,8 +49,8 @@ If the user didn't say, infer intent:
 - Asks "how", "luồng", "flow" → `flow`
 - Asks "why", "tại sao", "lý do" → `why`
 
-If still unclear, ask: "Bạn muốn giải thích: code (file cụ thể), concept (khái niệm), flow (luồng xử lý),
-hay why (lý do thiết kế)?"
+If still unclear, use the **AskUserQuestion** tool — question: "Bạn muốn giải thích gì?", options:
+"Code (file cụ thể)" / "Concept (khái niệm)" / "Flow (luồng xử lý)" / "Why (lý do thiết kế)".
 
 ### 2. Read order by mode
 | Mode | Read in this order |

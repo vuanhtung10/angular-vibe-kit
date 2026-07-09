@@ -64,7 +64,11 @@ The version-matched best-practice file is in `.claude/angular-practices/`
      Default if team does not answer: treat as SUGGESTION.
    - **Commit convention**: if the prefix or language is ambiguous from `git log`, confirm them
      (default: no prefix, language vi).
-2. Ask them as ONE grouped batch of multiple-choice questions.
+2. Ask them via the **AskUserQuestion** tool as multiple-choice questions (2–4 options each, e.g.
+   "NgRx" / "Signals" / "Both — I'll clarify" for a state-management question) — never as plain
+   chat text. The tool accepts up to 4 questions per call; if there are more than 4 uncertain
+   items, batch them into consecutive AskUserQuestion calls (still before writing anything), not
+   one-by-one plain-text questions.
 3. **WAIT** for the answers. Do not write any file until the batch is answered.
 4. If nothing is uncertain, say so and proceed directly to Stage 2.
 
