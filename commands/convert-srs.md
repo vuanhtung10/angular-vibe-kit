@@ -2,6 +2,8 @@ Convert any non-Markdown SRS source (PDF, DOCX, PPTX, XLSX, image with text, ZIP
 into one or more Markdown files under `docs/srs/`, indexed in `docs/srs/README.md`, ready for
 `/plan <feature>` to consume.
 
+> **Ngôn ngữ:** các thông báo/tóm tắt của command này viết bằng tiếng Việt (đã có sẵn ở nhiều chỗ); giữ nguyên tên file/lệnh.
+
 This command wraps **Microsoft Markitdown** (https://github.com/microsoft/markitdown) — a Python
 utility specifically tuned for LLM-friendly Markdown output (preserves headings, lists, tables, image
 links). It is *installed on the user's dev machine only* (not in the Angular project). If the binary

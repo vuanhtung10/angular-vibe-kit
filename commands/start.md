@@ -1,5 +1,7 @@
 Start of a new coding session. Read context before doing anything.
 
+> **Ngôn ngữ:** phần tóm tắt trả lời cho user viết bằng tiếng Việt (đã có sẵn ở phần hỏi cuối).
+
 ## First: Has `/init` been run on this project?
 
 Before reading anything, check `docs/PROJECT-STATUS.md`:

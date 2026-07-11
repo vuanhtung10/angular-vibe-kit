@@ -1,6 +1,8 @@
 Plan a feature before writing any code: clarify the requirement, weigh approaches, agree on a
 design, then write a detailed, task-by-task implementation plan to `docs/plans/`.
 
+> **Ngôn ngữ:** hội thoại (câu hỏi, tóm tắt) và nội dung file plan viết bằng tiếng Việt; giữ nguyên tên file/lệnh/code.
+
 This command produces a PLAN, not code. It writes exactly one file — the plan document — and
 nothing else. `/dev-cycle` (gated, recommended) or `/new-feature` (linear) then execute it.
 

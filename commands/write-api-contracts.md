@@ -1,5 +1,7 @@
 Write or update the API contract documentation for a feature module.
 
+> **Ngôn ngữ:** phần mô tả/Notes viết bằng tiếng Việt; giữ nguyên endpoint, DTO, code bằng tiếng Anh.
+
 This is the sibling command to `/write-tests`, `/write-context`, `/update-status` — a focused,
 single-purpose command that touches **only** the API contract docs (the WHAT). It is decoupled
 from `/write-context` (which captures WHY the code is the way it is) and from `/write-tests`

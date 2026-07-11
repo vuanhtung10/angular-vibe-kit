@@ -1,5 +1,9 @@
 Create a new feature module — **code only**. This command writes the code: folder structure,
-model, service, routes, page components, presentational components. It does **NOT** write tests,
+model, service, routes, page components, presentational components.
+
+> **Ngôn ngữ:** trả lời/tóm tắt cho user bằng tiếng Việt (giữ nguyên tên file/lệnh/code bằng tiếng Anh).
+
+It does **NOT** write tests,
 does **NOT** update `docs/api-contracts/`, `docs/PROJECT-STATUS.md`, or `CONTEXT.md`, and does
 **NOT** run review. Those are separate, manually-invoked commands — they're decoupled so each one
 runs at the right moment:

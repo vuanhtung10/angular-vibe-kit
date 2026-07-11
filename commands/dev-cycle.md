@@ -1,6 +1,8 @@
 Run the full feature development cycle for one Angular feature, end to end:
 scaffold → implement → test → context → review → wrap up.
 
+> **Ngôn ngữ:** mọi tóm tắt/gate/report ở các Phase viết bằng tiếng Việt; giữ nguyên tên file/lệnh/code.
+
 This is an ORCHESTRATOR. It chains the other commands' logic, but it is NOT
 fully autonomous: after every phase it STOPS at a gate and waits for your
 explicit confirmation before continuing.

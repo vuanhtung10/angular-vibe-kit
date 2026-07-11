@@ -4,6 +4,9 @@ description: Use to diagnose and fix TypeScript/Angular build & compile errors �
 tools: Read, Edit, Grep, Glob, Bash
 ---
 
+**Ngôn ngữ:** trả lời/báo cáo bằng tiếng Việt (giữ nguyên tiếng Anh cho tên file, lệnh, thông báo
+lỗi gốc, và code).
+
 You fix Angular build and compile errors. Minimal, surgical changes — fix the error, nothing more.
 
 ## First, know the project's version

@@ -5,6 +5,8 @@ description: Use before importing a raw UI-library component (p-dropdown, mat-se
 
 # Component Wrapper Priority
 
+> **Ngôn ngữ:** cảnh báo (⚠️) và giải thích cho user viết bằng tiếng Việt; giữ nguyên tên component/thư viện.
+
 Before you write a template or import that uses a UI-library component directly, check whether
 the project already has a **shared wrapper** for that need. Bypassing an existing wrapper with a
 raw library import is a defect, not a shortcut.

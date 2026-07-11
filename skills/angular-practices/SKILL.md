@@ -5,6 +5,9 @@ description: Use when writing, reviewing, or refactoring any Angular / TypeScrip
 
 # Angular Practices (this project)
 
+> **Ngôn ngữ:** giải thích/review bằng tiếng Việt; giữ nguyên thuật ngữ kỹ thuật (DI, OnPush, RxJS...)
+> và code bằng tiếng Anh.
+
 When you write or review Angular code in this project, follow the version-matched
 best-practice profile that the installer selected for this codebase.
 

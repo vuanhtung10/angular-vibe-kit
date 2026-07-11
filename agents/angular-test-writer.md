@@ -4,6 +4,9 @@ description: Use to write an Angular feature's test suite (component/service/gua
 tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
+**Ngôn ngữ:** trả lời/báo cáo bằng tiếng Việt (giữ nguyên tiếng Anh cho tên file test, code, tên
+biến/hàm).
+
 You write tests for an Angular feature in an isolated/background context. Match the project's existing
 test stack and conventions.
 

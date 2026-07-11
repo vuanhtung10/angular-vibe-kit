@@ -1,5 +1,7 @@
 Update `docs/PROJECT-STATUS.md` based on what we did this session.
 
+> **Ngôn ngữ:** viết nội dung docs bằng tiếng Việt (giữ nguyên tên file/module bằng tiếng Anh).
+
 Rules:
 1. Read the current `docs/PROJECT-STATUS.md` first
 2. Move completed items from "In Progress" → "Completed" (with date)

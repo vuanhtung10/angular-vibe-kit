@@ -1,5 +1,7 @@
 Review the current code changes against this project's Angular standards.
 
+> **Ngôn ngữ:** viết báo cáo review bằng tiếng Việt (giữ nguyên `file:line`, tên biến/hàm, code bằng tiếng Anh).
+
 1. Get the diff: run `git diff` (unstaged) and `git diff --staged`, or `git diff <base>...HEAD` if a
    base branch is named. Review only the changed code.
 2. Apply the full checklist in `.claude/references/review-checklist.md` — it defines the review

@@ -1,7 +1,8 @@
 ---
 name: clarify-request
 description: >
-  Normalize a vague or underspecified request into a standard brief BEFORE acting on it.
+  Normalize a vague or underspecified request into a ready-to-paste, Claude-Code-optimized prompt
+  that is PRINTED for the user to review/edit — the skill does NOT act on it.
   Use when the user asks for work with missing context — e.g. "fix bug A" (no repro/error),
   "thêm tính năng B" / "add feature B" (no scope), "sửa cho tôi", "thêm trường X vào component Y"
   (no data type / validation / API info), "kiểm tra hiệu suất" / "check performance" (no target or
@@ -17,10 +18,14 @@ allowed-tools:
 
 # Clarify Request (prompt normalizer)
 
+> **Ngôn ngữ:** bảng câu hỏi và Brief in ra cho user viết bằng tiếng Việt.
+
 Terse requests like "fix bug A" or "add field X" waste a round-trip when acted on blindly: the
 wrong file gets changed, the wrong shape gets assumed, the fix misses the actual symptom. This
-skill turns such a request into a **standard brief** — filled from the project first, from the
-user only for what the project cannot answer — then routes it to the right workflow.
+skill turns such a request into a **ready-to-paste, Claude-Code-optimized prompt** — filled from
+the project first, from the user only for what the project cannot answer — then **prints it for the
+user to review, edit, and paste back themselves**. The final output is prompt text, NOT an action:
+the skill never edits code, dispatches an agent, or starts a workflow on its own.
 
 ## When NOT to trigger (check first)
 
@@ -56,11 +61,11 @@ Never ask what the project already answers. Look here first:
 
 ## Step 3 — Ask ONE batched set of what's still missing
 
-Ask only the unfilled fields via the **AskUserQuestion** tool, all in one batch (up to 4 questions
-per call — split into consecutive calls if there are more), multiple-choice wherever the answer
-space is bounded. Only fall back to a plain chat question for a field that is genuinely open text
-(e.g. an error message, a free-form description) — AskUserQuestion needs 2–4 concrete options, so
-don't force one where there isn't a real choice.
+Ask only the unfilled fields. For any field with a natural small set of choices, ask via the
+**`AskUserQuestion`** tool (popup selection, not plain text) — batch multiple fields into as few
+calls as the tool allows (max 4 questions per call, 2-4 options each; it always adds an "Other"
+choice for free-form input). Fields that are genuinely open-ended (e.g. an exact target path, a
+repro description) don't fit fixed options — ask those directly as text, in the same round.
 Required fields by intent:
 
 **Common (all intents):** exact target (file/component/feature) · current vs. expected behavior ·
@@ -73,33 +78,57 @@ scope + constraints (what must NOT be touched) · done-criteria (how we know it'
 | **small-edit** | data type of the new field · validation rules · where it shows (form / table / both) · does the API already return it |
 | **review** | which page/component · concrete symptom (slow on load? scroll? typing?) · expected measure |
 
-If an answer reveals a new ambiguity, ask that one follow-up (via AskUserQuestion if it has a
-bounded answer set, plain text otherwise) — don't guess silently, don't drip every question one
-at a time.
+If an answer reveals a new ambiguity, ask that one follow-up — don't guess silently, don't drip
+every question one at a time.
 
-## Step 4 — Print the brief, then route
+## Step 4 — Assemble & print the normalized prompt, then STOP
 
-Print the normalized brief so the user can correct it at a glance:
+Assemble everything — the original request + what you filled from the project (Step 2) + the
+user's answers (Step 3) — into ONE complete, Vietnamese, Claude-Code-ready prompt, and print it
+**inside a ` ```text ` fenced block** so the user can copy it in one tap.
 
-```markdown
-📋 **Brief**
-- Type: <bug | feature | small-edit | review>
-- Target: <exact file/component/feature path>
-- Current → Expected: <one line>
-- Scope: <in> / NOT: <out>
-- Done when: <criteria>
-- Filled from project: <what you found and where>
-- From user: <their answers>
+The printed prompt follows this template:
+
+1. Opening line `Đọc toàn bộ source code trong thư mục:` + the **verified target path** from Step 2.
+2. One sentence stating the overall goal.
+3. Numbered sections (1, 2, 3…), one per group of requirements, each with concrete sub-bullets —
+   **embed the real file / component / service / endpoint names** discovered in Step 2.
+4. A `YÊU CẦU CHUNG` section: follow project conventions (cite `.claude/rules/project-rules.md`,
+   `.claude/angular-practices/`, and wrapper priority in `docs/DESIGN_SYSTEM.md`), list what must
+   stay untouched, any other constraints, and "liệt kê file đã đổi + tóm tắt sau khi xong".
+5. Closing line: `Hãy đọc code trước, xác nhận lại cấu trúc file liên quan với tôi, rồi mới tiến hành.`
+
+For anything the user has not supplied yet (e.g. "interface/API gửi sau"), insert an explicit
+placeholder `⚠️ TODO: <mô tả> (tôi sẽ cung cấp sau)` so the user can fill it in themselves.
+
+Skeleton of the block to print:
+
+```text
+Đọc toàn bộ source code trong thư mục:
+<target path đã verify ở Step 2>
+
+Tôi muốn <mục tiêu tổng quát> theo yêu cầu sau:
+
+1. <NHÓM YÊU CẦU 1>:
+   - <chi tiết cụ thể, kèm tên file/component/service thật>
+   - ⚠️ TODO: <thông tin user sẽ cung cấp sau>
+
+2. <NHÓM YÊU CẦU 2>:
+   - ...
+
+YÊU CẦU CHUNG:
+   - Tuân thủ convention/style dự án (.claude/rules/project-rules.md, .claude/angular-practices/,
+     ưu tiên wrapper trong docs/DESIGN_SYSTEM.md).
+   - Giữ nguyên: <liệt kê phần không đụng tới>.
+   - <ràng buộc khác nếu có>.
+   - Sau khi sửa xong, liệt kê file đã thay đổi + tóm tắt thay đổi từng file.
+
+Hãy đọc code trước, xác nhận lại cấu trúc file liên quan với tôi, rồi mới tiến hành.
 ```
 
-Then route — do not reinvent workflows this kit already has:
+Right below the block, print two short lines:
+- `✅ Đã điền từ dự án: <what you found and where>`
+- `✏️ Cần bạn kiểm tra/bổ sung: <placeholders / open items>`
 
-| Type | Route |
-|------|-------|
-| **feature** (multi-screen / multi-endpoint) | Suggest `/plan` → `/dev-cycle`; small single-screen feature may go straight to `/new-feature` |
-| **bug** (non-trivial / runtime) | Dispatch the **angular-debugger** agent; trivial one-liners fix directly |
-| **small-edit** | Do it directly, following the brief + `.claude/angular-practices/` + wrapper priority |
-| **review** | Run `/review-pr` inline, or dispatch **angular-reviewer** for a large diff; performance-scoped review states the symptom + target from the brief |
-
-One confirmation, not two: if the brief is complete and the route is obvious, state both and
-proceed — don't ask "is the brief OK?" and then "should I start?" as separate gates.
+**Then STOP.** Do NOT dispatch an agent, do NOT run `/plan`, `/dev-cycle`, or `/new-feature`, and
+do NOT edit any code. End with: "Copy hoặc chỉnh khối trên rồi dán lại để mình thực hiện."

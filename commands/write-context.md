@@ -1,5 +1,7 @@
 Write a `CONTEXT.md` file for the current feature module.
 
+> **Ngôn ngữ:** viết nội dung CONTEXT.md bằng tiếng Việt (giữ nguyên tên component/service/code bằng tiếng Anh).
+
 This file is a **snapshot** — it captures WHY this module was built this way,
 at the time it was built. It helps future developers (and AI) understand decisions
 without guessing from code.

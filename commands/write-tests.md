@@ -1,5 +1,7 @@
 Write tests for the specified feature module.
 
+> **Ngôn ngữ:** phần tường thuật/báo cáo bằng tiếng Việt; test code và tên file `.spec.ts` giữ nguyên tiếng Anh.
+
 Follow `.claude/references/test-spec.md` — it is the single source of truth for how this project writes
 tests: read-first, service unit tests (TestBed + `HttpTestingController`), component tests, E2E for
 critical flows only, and the verify step (coverage ≥ 80%, no real backend). It detects the project's

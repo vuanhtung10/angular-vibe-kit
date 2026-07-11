@@ -1,5 +1,9 @@
 Scan this Angular project's codebase and fill in the skeleton docs that were
-created by the installer. This command runs **one-shot**: scan → ask all open
+created by the installer.
+
+> **Ngôn ngữ:** câu hỏi ở Stage 1 và tóm tắt ở Stage 4 viết bằng tiếng Việt; nội dung docs kỹ thuật giữ nguyên thuật ngữ tiếng Anh khi cần.
+
+This command runs **one-shot**: scan → ask all open
 questions once → write all files → verify → summarize. Reads code and writes
 docs only — never modifies application source files.
 
